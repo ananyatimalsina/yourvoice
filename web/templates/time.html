@@ -1,0 +1,20 @@
+<div class="text-center">
+	<div class="text-2xl font-bold text-blue-600 mb-4">🕐 Current Server Time</div>
+	<div class="space-y-2">
+		<div class="text-lg font-mono bg-blue-50 p-3 rounded-lg">
+			<span class="text-blue-800">{{.Time}}</span>
+		</div>
+		<div class="text-sm text-gray-600">
+			<strong>Date:</strong> {{.Date}}
+		</div>
+		<div class="text-sm text-gray-600">
+			<strong>Timezone:</strong> {{.Timezone}}
+		</div>
+		<div class="text-sm text-gray-600">
+			<strong>Unix Timestamp:</strong> {{.UnixTimestamp}}
+		</div>
+	</div>
+	<div class="mt-4 p-3 bg-blue-50 rounded-lg">
+		<span class="text-blue-800 font-medium">✅ HTMX GET request successful!</span>
+	</div>
+</div>

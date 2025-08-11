@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Gorth Stack - Modern Web Development</title>
+	<link rel="stylesheet" href="../static/output.css">
+	<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<!-- Hero Section -->
+	<section class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+			<h2 class="text-5xl font-bold mb-6">Welcome to the Gorth Stack</h2>
+			<p class="text-xl mb-8 max-w-3xl mx-auto">
+				A modern, full-stack web development template combining the power of Go, GORM, Tailwind
+				CSS, and HTMX
+				for rapid, efficient web application development.
+			</p>
+			<button class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-200"
+				onclick="location.href='#demo'">
+				Try Live Demo
+			</button>
+		</div>
+	</section>
+
+	<!-- Features Section -->
+	<section id="features" class="py-20">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="text-center mb-16">
+				<h3 class="text-3xl font-bold text-gray-900 mb-4">Tech Stack Features</h3>
+				<p class="text-lg text-gray-600">Everything you need for modern web development</p>
+			</div>
+
+			<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+				<!-- Go -->
+				<div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-200">
+					<div
+						class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+						<img src="https://go.dev/blog/go-brand/Go-Logo/SVG/Go-Logo_Blue.svg"
+							alt="go logo">
+					</div>
+					<h4 class="text-xl font-semibold mb-2">Go Backend</h4>
+					<p class="text-gray-600">Fast, concurrent, and efficient server-side development
+						with Go's powerful standard library.</p>
+				</div>
+
+				<!-- GORM -->
+				<div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-200">
+					<div
+						class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+						<img src="https://gorm.io/gorm.svg" alt="gorm logo">
+					</div>
+					<h4 class="text-xl font-semibold mb-2">GORM ORM</h4>
+					<p class="text-gray-600">Elegant database operations with auto-migrations,
+						associations, and powerful query capabilities.</p>
+				</div>
+
+				<!-- Tailwind CSS -->
+				<div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-200">
+					<div
+						class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-4">
+						<img src="https://tailwindcss.com/_next/static/media/tailwindcss-mark.d52e9897.svg"
+							alt="tailwindcss logo">
+					</div>
+					<h4 class="text-xl font-semibold mb-2">Tailwind CSS</h4>
+					<p class="text-gray-600">Utility-first CSS framework for rapid UI development
+						with consistent design patterns.</p>
+				</div>
+
+				<!-- HTMX -->
+				<div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-200">
+					<div
+						class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+						<img src="https://raw.githubusercontent.com/weh/devicon/b96be2b242a2cd15eed590a7ffca4a8e4342d49b/icons/htmx/htmx-original.svg"
+							alt="htmx logo">
+					</div>
+					<h4 class="text-xl font-semibold mb-2">HTMX</h4>
+					<p class="text-gray-600">Dynamic, interactive web applications without complex
+						JavaScript frameworks or build steps.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Demo Section -->
+	<section id="demo" class="bg-gray-100 py-20">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="text-center mb-12">
+				<h3 class="text-3xl font-bold text-gray-900 mb-4">Interactive Demo</h3>
+				<p class="text-lg text-gray-600">See HTMX in action with server-side rendering</p>
+			</div>
+
+			<div class="bg-white rounded-lg shadow-lg p-8">
+				<div class="flex flex-col md:flex-row gap-8">
+					<div class="flex-1">
+						<h4 class="text-xl font-semibold mb-4">Try HTMX Features</h4>
+						<div class="space-y-4">
+							<button class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200"
+								hx-get="/api/greeting" hx-target="#demo-output"
+								hx-swap="innerHTML">
+								Get Server Greeting
+							</button>
+							<button class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition duration-200"
+								hx-get="/api/time" hx-target="#demo-output"
+								hx-swap="innerHTML">
+								Get Current Time
+							</button>
+							<button class="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition duration-200"
+								hx-get="/api/stats" hx-target="#demo-output"
+								hx-swap="innerHTML">
+								Show Server Stats
+							</button>
+						</div>
+					</div>
+					<div class="flex-1">
+						<h4 class="text-xl font-semibold mb-4">Response</h4>
+						<div id="demo-output"
+							class="bg-gray-50 p-4 rounded-lg min-h-32 border-2 border-dashed border-gray-300">
+							<p class="text-gray-500 text-center">Click a button to see HTMX
+								in action!</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Getting Started Section -->
+	<section class="py-20">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="text-center mb-12">
+				<h3 class="text-3xl font-bold text-gray-900 mb-4">Getting Started</h3>
+				<p class="text-lg text-gray-600">Start building with the Gorth stack in minutes</p>
+			</div>
+
+			<div class="grid md:grid-cols-3 gap-8">
+				<div class="text-center">
+					<div
+						class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+						<span class="text-2xl font-bold text-blue-600">1</span>
+					</div>
+					<h4 class="text-xl font-semibold mb-2">Clone Template</h4>
+					<p class="text-gray-600">Use this repository as a GitHub template to start your
+						project</p>
+				</div>
+				<div class="text-center">
+					<div
+						class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+						<span class="text-2xl font-bold text-green-600">2</span>
+					</div>
+					<h4 class="text-xl font-semibold mb-2">Install Dependencies</h4>
+					<p class="text-gray-600">Run <code class="bg-gray-200 px-2 py-1 rounded">go mod
+							tidy && npm install</code> to install Go dependencies</p>
+				</div>
+				<div class="text-center">
+					<div
+						class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+						<span class="text-2xl font-bold text-purple-600">3</span>
+					</div>
+					<h4 class="text-xl font-semibold mb-2">Start Building</h4>
+					<p class="text-gray-600">Run <code
+							class="bg-gray-200 px-2 py-1 rounded">air</code> and start
+						developing</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Footer -->
+	<footer class="bg-gray-900 text-white py-12">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="grid md:grid-cols-4 gap-8">
+				<div class="col-span-2">
+					<h5 class="text-xl font-bold mb-4">Gorth Stack</h5>
+					<p class="text-gray-400 mb-4">
+						A modern web development template for building fast, interactive
+						applications with Go, GORM, Tailwind CSS, and HTMX.
+					</p>
+				</div>
+				<div>
+					<h6 class="font-semibold mb-4">Technologies</h6>
+					<ul class="space-y-2 text-gray-400">
+						<li>Go</li>
+						<li>GORM ORM</li>
+						<li>Tailwind CSS</li>
+						<li>HTMX 2.0</li>
+					</ul>
+				</div>
+				<div>
+					<h6 class="font-semibold mb-4">Resources</h6>
+					<ul class="space-y-2 text-gray-400">
+						<li><a href="https://go.dev/doc" class="hover:text-white">Go
+								Documentation</a></li>
+						<li><a href="https://gorm.io/docs" class="hover:text-white">GORM
+								Guide</a>
+						</li>
+						<li><a href="https://tailwindcss.com/docs/styling-with-utility-classes"
+								class="hover:text-white">Tailwind
+								CSS</a></li>
+						<li><a href="https://htmx.org/docs" class="hover:text-white">HTMX
+								Docs</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+				<p>&copy; 2025 Ananya Timalsina. Ready to build amazing web applications.</p>
+			</div>
+		</div>
+	</footer>
+</body>
+
+</html>

@@ -1,0 +1,26 @@
+<div class="text-center">
+	<div class="text-2xl font-bold text-purple-600 mb-4">📊 Server Statistics</div>
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+		<div class="bg-purple-50 p-4 rounded-lg">
+			<div class="text-lg font-semibold text-purple-800 mb-2">System Info</div>
+			<div class="space-y-1 text-sm">
+				<div><strong>Go Version:</strong> {{.GoVersion}}</div>
+				<div><strong>CPU Cores:</strong> {{.CpuCores}}</div>
+				<div><strong>Goroutines:</strong> {{.Goroutines}}</div>
+				<div><strong>Uptime:</strong> {{.Uptime}}</div>
+			</div>
+		</div>
+		<div class="bg-purple-50 p-4 rounded-lg">
+			<div class="text-lg font-semibold text-purple-800 mb-2">Memory Usage</div>
+			<div class="space-y-1 text-sm">
+				<div><strong>Current Alloc:</strong> {{.CurrentAlloc}} MB</div>
+				<div><strong>Total Alloc:</strong> {{.TotalAlloc}} MB</div>
+				<div><strong>System Memory:</strong> {{.SystemMemory}} MB</div>
+				<div><strong>GC Cycles:</strong> {{.GcCycles}}</div>
+			</div>
+		</div>
+	</div>
+	<div class="mt-4 p-3 bg-purple-50 rounded-lg">
+		<span class="text-purple-800 font-medium">✅ HTMX GET request successful!</span>
+	</div>
+</div>
