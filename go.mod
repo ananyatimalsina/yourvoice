@@ -1,4 +1,4 @@
-module gorth
+module yourvoice
 
 go 1.24.5
 

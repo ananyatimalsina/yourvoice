@@ -1,11 +1,11 @@
 package main
 
 import (
-	"gorth/internal/handlers"
-	"gorth/internal/middleware"
 	"log"
 	"net/http"
 	"os"
+	"yourvoice/internal/handlers"
+	"yourvoice/internal/middleware"
 
 	"github.com/joho/godotenv"
 )
