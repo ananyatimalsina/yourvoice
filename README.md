@@ -1,60 +1,93 @@
-# Gorth Stack Template
+# YourVoice
 
-A modern, full-stack web development template combining **Go**, **GORM**, **Tailwind CSS**, and **HTMX** for rapid, efficient web application development.
+**Anonymous eVoting & Feedback Platform**
 
-## Tech Stack
+YourVoice is a cryptographically secure anonymous voting platform that uses RSA blind signatures to ensure voter privacy while preventing double-voting. Built with Go, PostgreSQL, and modern web technologies.
+
+## 🔐 Features
+
+- **Anonymous Voting**: RSA blind signatures ensure votes cannot be traced to voters
+- **Double-Vote Prevention**: Cryptographic credentials prevent multiple votes per person
+- **Network Privacy**: Tor network support for complete anonymity
+- **Secure Architecture**: Mathematical privacy guarantees through cryptography
+- **Open Source**: Fully auditable implementation
+
+## 🏗️ Architecture
+
+### Cryptographic Protocol
+
+YourVoice implements a 4-step RSA blind signature protocol:
+
+1. **AUTH**: Voter proves identity without revealing their vote
+2. **BLIND**: Voter blinds their secret using cryptographic blinding factor
+3. **SIGN**: Authority signs the blinded secret without knowing its content
+4. **VOTE**: Voter unblinds the signature and submits anonymously via Tor
+
+```
+unblind(sign(blind(message))) = sign(message)
+```
+
+The authority never sees the original secret, and the server cannot link credentials to voter identity.
+
+## 🛠️ Tech Stack
 
 - **Go** - Backend server with stdlib HTTP routing
-- **GORM** - Go ORM for database operations 
+- **PostgreSQL** - Database with GORM ORM
 - **Tailwind CSS** - Utility-first CSS framework
 - **HTMX** - Dynamic web applications without complex JavaScript
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 ├── internal/
 │   ├── database/           # Database configuration and models
 │   │   ├── models/
+│   │   │   ├── Candidate.go
+│   │   │   ├── Message.go
+│   │   │   ├── MessageEvent.go
+│   │   │   ├── Party.go
+│   │   │   ├── Vote.go
+│   │   │   └── VoteEvent.go
 │   │   └── database.go
 │   ├── handlers/           # HTTP handlers and routing
-│   │   ├── routes/         # API route handlers
-│   │   │   ├── greeting.go
-│   │   │   ├── stats.go
-│   │   │   └── time.go
-│   │   └── handlers.go     # Main route registration
-│   └── middleware/         # HTTP middleware stack
-│       ├── logging.go      # Request logging
-│       └── middleware.go   # Middleware composition
+│   │   ├── routes/
+│   │   │   ├── expression/ # Vote and message submission
+│   │   │   │   ├── message.go
+│   │   │   │   └── vote.go
+│   │   │   └── identity/   # Cryptographic verification
+│   │   │       └── verify.go
+│   │   └── handlers.go
+│   ├── middleware/         # HTTP middleware
+│   │   ├── contentTypeJson.go
+│   │   ├── logging.go
+│   │   └── middleware.go
+│   └── utils/              # Cryptographic utilities
+│       ├── rss.go
+│       └── types.go
 ├── web/
-│   ├── static/             # Static assets
-│   │   └── main.css        #  input file
+│   ├── static/             # CSS and assets
+│   │   └── main.css
 │   └── templates/          # HTML templates
-│       ├── index.html      # Main page
-│       ├── greeting.html   # HTMX fragment
-│       ├── stats.html      # HTMX fragment  
-│       └── time.html       # HTMX fragment
-├── .env                    # Environment variables
-├── .air.toml               # Air configuration
+│       └── index.html      # Landing page with API docs
+├── docker-compose.yml      # PostgreSQL database
+├── .env                    # Environment configuration
 ├── go.mod                  # Go dependencies
-├── main.go                 # Application entrypoint
-├── package.json            # Node.js dependencies ()
-└── shell.nix               # Nix development environment
+└── main.go                 # Application entrypoint
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
 - Go
-- Node.js (for  CSS)
-- Optional: Nix (for reproducible development environment)
+- Docker & Docker Compose
+- Node.js (for Tailwind CSS)
 
-### 1. Clone Template
+### 1. Clone Repository
 
 ```bash
-# Use this repository as a GitHub template
-git clone https://github.com/ananyatimalsina/gorth
-cd gorth
+git clone https://github.com/ananyatimalsina/yourvoice
+cd yourvoice
 ```
 
 ### 2. Install Dependencies
@@ -63,240 +96,244 @@ cd gorth
 # Go dependencies
 go mod tidy
 
-# Node.js dependencies (for )
+# Node.js dependencies (for Tailwind CSS)
 npm install
 ```
 
-### 3. Environment Setup
-
-Modfiy `.env` as needed:
+### 3. Database Setup
 
 ```bash
-nano .env
+# Start PostgreSQL with Docker
+docker-compose up -d
+
+# Wait for database to be ready
+docker-compose logs db
 ```
 
-### 4. Run Development Server
+### 4. Environment Configuration
+
+The `.env` file is pre-configured for development:
 
 ```bash
-# Option 1: Use air live reload
+SERVER_PORT=3000
+TZ=Europe/Berlin
+
+# PostgreSQL configuration
+POSTGRES_HOST=localhost
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=postgres
+POSTGRES_PORT=5432
+```
+
+### 5. Build CSS
+
+```bash
+# Build Tailwind CSS
+npx @tailwindcss/cli -i "./web/static/main.css" -o "./web/static/output.css" --minify
+```
+
+### 6. Run Development Server
+
+```bash
+# Option 1: Use air for live reload
 air
 
-# Option 2: Manual commands (no live reload)
-npx @tailwindcss/cli -i "./web/static/main.css" -o "./web/static/output.css" --minify
+# Option 2: Manual run
 go run main.go
 ```
 
-Visit `http://localhost:8080` to see the demo page.
+Visit `http://localhost:3000` to see the platform.
 
-### 6. Nix Development Environment (Optional)
+## 📡 API Endpoints
 
-```bash
-nix-shell
-# Now you have Go and Node.js available
+### Identity Verification
+
+Get blind signatures for voting or messaging:
+
+#### POST `/api/identity/verifyVote`
+```json
+// Request
+{
+  "digest": "blinded_secret",
+  "event_id": 1
+}
+
+// Response
+{
+  "signature": "signed_digest"
+}
 ```
 
-## Architecture
+#### POST `/api/identity/verifyMessage`
+```json
+// Request
+{
+  "digest": "blinded_secret", 
+  "event_id": 1
+}
 
-### HTTP Server
+// Response
+{
+  "signature": "signed_digest"
+}
+```
 
-- **Standard Library Routing**: Uses Go's `http.ServeMux` for routing
-- **Middleware Stack**: Composable middleware using functional composition
-- **Static File Serving**: Serves CSS, JS, and other assets from `/static`
+### Expression Submission
 
-### Middleware
+Submit anonymous votes and messages:
 
-The middleware stack includes:
+#### POST `/api/expression/vote`
+```json
+// Request
+{
+  "data": "signed_data",
+  "digest": "unsigned_data",
+  "vote_event_id": 1,
+  "candidate_id": 2
+}
 
-- **Logging**: Request/response logging with status codes
-- **Custom**: Easy to add your own middleware
+// Response
+"Vote received successfully"
+```
 
-### Database Integration
+#### POST `/api/expression/message`
+```json
+// Request
+{
+  "data": "signed_data",
+  "digest": "unsigned_data", 
+  "message_event_id": 1,
+  "message": "Your feedback text"
+}
 
-GORM is pre-configured but commented out in `main.go`. To enable:
+// Response
+"Vote received successfully"
+```
 
-1. Uncomment database initialization in `main.go`
-2. Configure your database connection in `internal/database/database.go`
-3. Add models and migrations as needed
+## 🔧 Development
 
-### HTMX Integration
+### Adding New Models
 
-The template demonstrates HTMX patterns:
+Create models in `internal/database/models/`:
 
-- **Fragment Responses**: API endpoints return HTML fragments
-- **Progressive Enhancement**: Works without JavaScript
-- **Server-Side State**: All state management on the server
+```go
+// internal/database/models/NewModel.go
+package models
 
-### CSS Architecture
+import "yourvoice/internal/utils"
 
-- **Tailwind CSS**: Utility-first styling
-- **Build Process**: CSS is compiled from `main.css` to `output.css`
-- **Development**: Rebuild CSS when adding new Tailwind classes
-
-## Development Workflow
+type NewModel struct {
+    utils.Expression
+    // Add your fields
+}
+```
 
 ### Adding New Routes
 
 1. Create handler in `internal/handlers/routes/`
 2. Register route in `internal/handlers/handlers.go`
-3. Create template in `web/templates/` (if needed)
 
-Example:
+### Database Migrations
 
-```go
-// internal/handlers/routes/example.go
-package routes
+GORM auto-migration runs on startup. Models are automatically migrated when the server starts.
 
-import (
-    "html/template"
-    "net/http"
-)
+### Development with Air
 
-func ExampleHandler(w http.ResponseWriter, r *http.Request) {
-    tmpl := template.Must(template.ParseFiles("web/templates/example.html"))
-    data := map[string]interface{}{
-        "Message": "Hello from HTMX!",
-    }
-    tmpl.Execute(w, data)
-}
-
-// Register in handlers.go
-apiRouter.HandleFunc("GET /example", routes.ExampleHandler)
-```
-
-### Adding Middleware
-
-```go
-// internal/middleware/auth.go
-package middleware
-
-import "net/http"
-
-func Auth(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        // Auth logic here
-        next.ServeHTTP(w, r)
-    })
-}
-
-// Add to stack in main.go
-stack := middleware.CreateStack(
-    middleware.Logging,
-    middleware.Auth,  // Add your middleware
-)
-```
-
-### Working with HTMX
-
-Templates in `web/templates/` are HTMX fragments. They should:
-
-- Return pure HTML without `<html>` or `<head>` tags
-- Use Tailwind classes for styling
-- Include HTMX success indicators if desired
-
-Example HTMX endpoint:
-
-```html
-<!-- In your main template -->
-<button hx-get="/api/data" hx-target="#result" hx-swap="innerHTML">
-    Load Data
-</button>
-<div id="result"></div>
-
-<!-- web/templates/data.html -->
-<div class="p-4 bg-green-50 rounded">
-    <p>Data loaded: {{.Timestamp}}</p>
-</div>
-```
-
-### CSS Development
-When adding new Tailwind classes:
+Air provides live reload during development:
 
 ```bash
-# Rebuild CSS
-npx @tailwindcss/cli -i "./web/static/main.css" -o "./web/static/output.css" --minify
+# Install air (if not already installed)
+go install github.com/air-verse/air@latest
 
-# Or use air which includes CSS build
+# Run with live reload
 air
 ```
 
-### Database Models
+## 🐳 Production Deployment
 
-Add models to `internal/database/models`:
-
-```go
-// internal/database/models/user.go
-package database
-
-import "gorm.io/gorm"
-
-type User struct {
-    gorm.Model
-    Name  string
-    Email string `gorm:"unique"`
-}
-
-// Add to migrateModels in database.go
-func migrateModels(db *gorm.DB) {
-    db.AutoMigrate(&User{})
-}
-```
-
-## Production Deployment
-
-### Build Process
+### Docker Build
 
 ```bash
-# Build CSS
+# Build CSS for production
 npx @tailwindcss/cli -i "./web/static/main.css" -o "./web/static/output.css" --minify
 
 # Build Go binary
-go build -o app main.go
+go build -o yourvoice main.go
 
 # Deploy binary + web/ directory + .env
 ```
 
 ### Environment Variables
 
-Configure production environment:
+Configure production environment in `.env`:
 
 ```bash
-# .env
 SERVER_PORT=8080
-# Add your production configuration
+POSTGRES_HOST=your-db-host
+POSTGRES_USER=your-db-user
+POSTGRES_PASSWORD=your-secure-password
+POSTGRES_DB=yourvoice_prod
+POSTGRES_PORT=5432
 ```
 
-### Deployment Considerations
+### Security Considerations
 
-- Serve static files through a CDN or reverse proxy
-- Use a production database (PostgreSQL, MySQL, etc.)
-- Implement proper logging and monitoring
-- Add rate limiting and security headers
-- Use HTTPS in production
+- **HTTPS**: Always use HTTPS in production
+- **Database**: Use secure PostgreSQL credentials
+- **Tor Integration**: Consider Tor hidden service deployment
+- **Rate Limiting**: Implement API rate limiting
+- **Logging**: Monitor for suspicious voting patterns
 
-## Features Demonstrated
+## 🔒 Cryptographic Security
 
-The template includes working examples of:
+### RSA Blind Signatures
 
-- **Server-rendered HTML** with Go templates
-- **HTMX interactions** with multiple endpoints
-- **Tailwind CSS** styling with responsive design
-- **Middleware composition** for cross-cutting concerns
-- **Static file serving** for CSS, JS, and assets
-- **Environment configuration** with `.env` files
-- **Development tooling** with build scripts
+The platform implements David Chaum's blind signature protocol:
 
-## Extending the Template
+1. **Blinding Factor**: Random value `r` is used to blind the message
+2. **Blind Message**: `blind = message * r^e mod n`
+3. **Sign Blind**: Authority signs without seeing original: `sig = blind^d mod n`
+4. **Unblind**: Voter recovers signature: `real_sig = sig / r mod n`
 
-This template provides a solid foundation for:
+### Security Properties
 
-- **REST APIs** with JSON responses
-- **Server-side rendered applications** with HTMX
-- **Database-driven applications** with GORM
-- **Real-time features** with WebSockets (add your own)
-- **Authentication systems** (add middleware)
-- **File uploads** and processing
-- **Background jobs** and workers
+- **Anonymity**: Authority cannot link signatures to voters
+- **Unforgeability**: Only authority can create valid signatures
+- **Single-Use**: Credentials are stored to prevent double-voting
+- **Unlinkability**: Submitted votes cannot be traced to credential requests
 
-## Contributing
+## 🧪 Testing
 
-Feel free to submit issues and pull requests to improve this template.
+```bash
+# Run tests
+go test ./...
+
+# Test with verbose output
+go test -v ./...
+
+# Test specific package
+go test ./internal/utils
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 🔗 Links
+
+- **GitHub**: [https://github.com/ananyatimalsina/yourvoice](https://github.com/ananyatimalsina/yourvoice)
+- **Live Demo**: [Coming Soon]
+- **Documentation**: [This README]
+
+## ⚠️ Disclaimer
+
+This is experimental software. While implementing well-established cryptographic protocols, it should be thoroughly audited before use in production voting systems. The authors are not responsible for any security vulnerabilities or election integrity issues.
+
+---
+
+**Built with privacy in mind. Express your voice, protect your identity.**
