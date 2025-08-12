@@ -1,6 +1,10 @@
 package utils
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"database/sql/driver"
+	"fmt"
 	"gorm.io/gorm"
 	"time"
 )
@@ -10,11 +14,35 @@ type Expression struct {
 	Data string `json:"data" gorm:"not null"`
 }
 
+type RSAPrivateKey struct {
+	Key *rsa.PrivateKey
+}
+
+func (r RSAPrivateKey) Value() (driver.Value, error) {
+	if r.Key == nil {
+		return nil, nil
+	}
+	der := x509.MarshalPKCS1PrivateKey(r.Key)
+	return der, nil
+}
+
+func (r *RSAPrivateKey) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("expected []byte, got %T", value)
+	}
+	key, err := x509.ParsePKCS1PrivateKey(b)
+	if err != nil {
+		return err
+	}
+	r.Key = key
+	return nil
+}
+
 type Event struct {
 	gorm.Model
-	Name       string    `json:"name" gorm:"not null"`
-	StartDate  time.Time `json:"start_date" gorm:"not null"`
-	EndDate    time.Time `json:"end_date" gorm:"not null"`
-	PrivateKey []byte    `json:"private_key" gorm:"not null"`
-	PublicKey  []byte    `json:"public_key" gorm:"not null"`
+	Name       string        `json:"name" gorm:"not null"`
+	StartDate  time.Time     `json:"start_date" gorm:"not null"`
+	EndDate    time.Time     `json:"end_date" gorm:"not null"`
+	PrivateKey RSAPrivateKey `json:"private_key" gorm:"not null"`
 }
