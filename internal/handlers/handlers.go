@@ -32,8 +32,8 @@ func LoadHanders(router *http.ServeMux, db *gorm.DB) {
 		identity.VerifyVote(w, r, db)
 	})
 
-	identityRouter.HandleFunc("POST /verifyVote", func(w http.ResponseWriter, r *http.Request) {
-		identity.VerifyVote(w, r, db)
+	identityRouter.HandleFunc("POST /verifyMessage", func(w http.ResponseWriter, r *http.Request) {
+		identity.VerifyMessage(w, r, db)
 	})
 
 	router.Handle("/api/expression/", http.StripPrefix("/api/expression", middleware.ContentTypeJson(expressionRouter)))
