@@ -1,18 +1,18 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
+	"yourvoice/internal/database"
 	"yourvoice/internal/handlers"
 	"yourvoice/internal/middleware"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
 	godotenv.Load(".env")
-	//db := database.LoadDatabase()
+	db := database.LoadDatabase()
 	port := os.Getenv("SERVER_PORT")
 	router := http.NewServeMux()
 
@@ -28,7 +28,7 @@ func main() {
 	// Static files
 	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 
-	handlers.LoadHanders(router)
+	handlers.LoadHanders(router, db)
 
 	log.Println("Server started at http://localhost:" + port)
 	log.Fatal(server.ListenAndServe())
