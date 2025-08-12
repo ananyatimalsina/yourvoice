@@ -15,18 +15,18 @@ type Expression struct {
 }
 
 type RSAPrivateKey struct {
-	Key *rsa.PrivateKey
+	Key rsa.PrivateKey
 }
 
 func (r RSAPrivateKey) Value() (driver.Value, error) {
-	if r.Key == nil {
+	if r.Key.D == nil {
 		return nil, nil
 	}
-	der := x509.MarshalPKCS1PrivateKey(r.Key)
+	der := x509.MarshalPKCS1PrivateKey(&r.Key)
 	return der, nil
 }
 
-func (r *RSAPrivateKey) Scan(value interface{}) error {
+func (r *RSAPrivateKey) Scan(value any) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return fmt.Errorf("expected []byte, got %T", value)
@@ -35,7 +35,7 @@ func (r *RSAPrivateKey) Scan(value interface{}) error {
 	if err != nil {
 		return err
 	}
-	r.Key = key
+	r.Key = *key
 	return nil
 }
 
