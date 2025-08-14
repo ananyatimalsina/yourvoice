@@ -7,7 +7,7 @@ YourVoice is a cryptographically secure anonymous voting platform that uses RSA 
 ## 🔐 Features
 
 - **Anonymous Voting**: RSA blind signatures ensure votes cannot be traced to voters
-- **Double-Vote Prevention**: Cryptographic credentials prevent multiple votes per person
+- **Double-Vote Prevention**: Storage of both anonymous secrets as well as identifiable spent events prevent multiple votes per person
 - **Network Privacy**: Tor network support for complete anonymity
 - **Secure Architecture**: Mathematical privacy guarantees through cryptography
 - **Open Source**: Fully auditable implementation
@@ -19,7 +19,7 @@ YourVoice is a cryptographically secure anonymous voting platform that uses RSA 
 YourVoice implements a 4-step RSA blind signature protocol:
 
 1. **AUTH**: Voter proves identity without revealing their vote
-2. **BLIND**: Voter blinds their secret using cryptographic blinding factor
+2. **BLIND**: Voter blinds their randomly generated secret using cryptographic blinding factor
 3. **SIGN**: Authority signs the blinded secret without knowing its content
 4. **VOTE**: Voter unblinds the signature and submits anonymously via Tor
 
@@ -27,7 +27,7 @@ YourVoice implements a 4-step RSA blind signature protocol:
 unblind(sign(blind(message))) = sign(message)
 ```
 
-The authority never sees the original secret, and the server cannot link credentials to voter identity.
+The authority never sees the original secret or the voters decision, and the server cannot link secrets to voter identity.
 
 ## 🛠️ Tech Stack
 
@@ -82,6 +82,14 @@ The authority never sees the original secret, and the server cannot link credent
 - Go
 - Docker & Docker Compose
 - Node.js (for Tailwind CSS)
+- Optional: Nix (for reproducible development environment)
+
+### 0. Nix Development Environment (Optional)
+
+```bash
+nix-shell
+# Now you have Go and Node.js available
+```
 
 ### 1. Clone Repository
 
@@ -100,17 +108,7 @@ go mod tidy
 npm install
 ```
 
-### 3. Database Setup
-
-```bash
-# Start PostgreSQL with Docker
-docker-compose up -d
-
-# Wait for database to be ready
-docker-compose logs db
-```
-
-### 4. Environment Configuration
+### 3. Environment Configuration
 
 The `.env` file is pre-configured for development:
 
@@ -126,21 +124,10 @@ POSTGRES_DB=postgres
 POSTGRES_PORT=5432
 ```
 
-### 5. Build CSS
+### 4. Run Development Server
 
 ```bash
-# Build Tailwind CSS
-npx @tailwindcss/cli -i "./web/static/main.css" -o "./web/static/output.css" --minify
-```
-
-### 6. Run Development Server
-
-```bash
-# Option 1: Use air for live reload
 air
-
-# Option 2: Manual run
-go run main.go
 ```
 
 Visit `http://localhost:3000` to see the platform.
@@ -238,21 +225,9 @@ type NewModel struct {
 
 GORM auto-migration runs on startup. Models are automatically migrated when the server starts.
 
-### Development with Air
+## Production Deployment
 
-Air provides live reload during development:
-
-```bash
-# Install air (if not already installed)
-go install github.com/air-verse/air@latest
-
-# Run with live reload
-air
-```
-
-## 🐳 Production Deployment
-
-### Docker Build
+### Manual Build
 
 ```bash
 # Build CSS for production
@@ -300,8 +275,8 @@ The platform implements David Chaum's blind signature protocol:
 
 - **Anonymity**: Authority cannot link signatures to voters
 - **Unforgeability**: Only authority can create valid signatures
-- **Single-Use**: Credentials are stored to prevent double-voting
-- **Unlinkability**: Submitted votes cannot be traced to credential requests
+- **Single-Use**: Secrets are stored to prevent double-voting
+- **Unlinkability**: Submitted votes cannot be traced to sign requests
 
 ## 🧪 Testing
 
