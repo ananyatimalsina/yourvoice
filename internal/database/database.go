@@ -27,8 +27,8 @@ func migrateModels(db *gorm.DB) {
 		&models.Candidate{},
 		&models.Vote{},
 		&models.VoteEvent{},
-		&models.MessageEvent{},
-		&models.Message{},
+		&models.FeedbackSession{},
+		&models.Feedback{},
 	)
 
 	if err != nil {

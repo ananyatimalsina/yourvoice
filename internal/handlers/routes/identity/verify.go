@@ -50,7 +50,7 @@ func VerifyVote(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	})
 }
 
-func VerifyMessage(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+func VerifyFeedback(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	ctx := r.Context()
 
 	var verify VerifyRequest
@@ -60,7 +60,7 @@ func VerifyMessage(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		return
 	}
 
-	event, err := gorm.G[models.MessageEvent](db).Where("id = ?", verify.EventID).First(ctx)
+	event, err := gorm.G[models.FeedbackSession](db).Where("id = ?", verify.EventID).First(ctx)
 	if err != nil {
 		http.Error(w, "Message event not found", http.StatusNotFound)
 		return
