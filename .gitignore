@@ -14,3 +14,12 @@ web/static/output.css
 
 # Temporary files
 tmp/
+
+# Storybook files
+*storybook.log
+storybook-static
+.storybook/
+stories/
+
+# Templ
+*_templ.go
