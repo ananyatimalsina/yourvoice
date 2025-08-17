@@ -34,7 +34,7 @@ The authority never sees the original secret or the voters decision, and the ser
 - **Go** - Backend server with stdlib HTTP routing
 - **PostgreSQL** - Database with GORM ORM
 - **Tailwind CSS** - Utility-first CSS framework
-- **HTMX** - Dynamic web applications without complex JavaScript
+- **Templ** - HTML UI framework with Go-native syntax
 
 ## 📁 Project Structure
 
