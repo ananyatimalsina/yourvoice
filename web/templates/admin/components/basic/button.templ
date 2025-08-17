@@ -5,6 +5,7 @@ import (
 )
 
 type ButtonAction struct {
+	ID      string // Optional ID for the button
 	Label   string
 	OnClick templ.ComponentScript
 	Type    string
@@ -23,6 +24,7 @@ type LinkAction struct {
 
 templ ActionButton(props ButtonAction) {
 	<button
+		id={ props.ID }
 		onclick={ props.OnClick }
 		type={ props.Type }
 		class={
