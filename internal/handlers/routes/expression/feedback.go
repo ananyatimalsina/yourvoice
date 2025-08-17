@@ -18,8 +18,8 @@ func Feedback(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	ctx := r.Context()
 
 	var feedback FeedbackRequest
-	if json.NewDecoder(r.Body).Decode(&feedback) != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&feedback); err != nil {
+		http.Error(w, "Failed to read request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 

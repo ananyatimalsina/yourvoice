@@ -22,8 +22,8 @@ func VerifyVote(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	ctx := r.Context()
 
 	var verify VerifyRequest
-	if json.NewDecoder(r.Body).Decode(&verify) != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&verify); err != nil {
+		http.Error(w, "Failed to read request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -53,8 +53,8 @@ func VerifyFeedback(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	ctx := r.Context()
 
 	var verify VerifyRequest
-	if json.NewDecoder(r.Body).Decode(&verify) != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&verify); err != nil {
+		http.Error(w, "Failed to read request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
