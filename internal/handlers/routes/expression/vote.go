@@ -18,8 +18,7 @@ func Vote(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	ctx := r.Context()
 
 	var vote VoteRequest
-	err := json.NewDecoder(r.Body).Decode(&vote)
-	if err != nil {
+	if json.NewDecoder(r.Body).Decode(&vote) != nil {
 		http.Error(w, "Failed to read request body", http.StatusBadRequest)
 		return
 	}
