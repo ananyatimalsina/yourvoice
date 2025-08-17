@@ -1,0 +1,71 @@
+package basic
+
+import (
+	"yourvoice/internal/utils"
+)
+
+type InputProps struct {
+	Type        string // utils.FilterItemType
+	Name        string
+	Label       string
+	Placeholder string
+	Value       string
+	Options     []InputOption // For select type
+	Required    bool
+}
+
+type InputOption struct {
+	Value string
+	Label string
+}
+
+templ Input(props InputProps) {
+	<div class="w-full">
+		if props.Label != "" {
+			<label for={ props.Name } class="block text-sm font-medium text-slate-300 mb-2">
+				{ props.Label }
+				if props.Required {
+					<span class="text-red-400">*</span>
+				}
+			</label>
+		}
+		switch props.Type {
+			case utils.InputTypeSelect, utils.InputTypeMultiple:
+				<select
+					id={ props.Name }
+					name={ props.Name }
+					class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-700 text-slate-100 focus:border-blue-500 focus:outline-none transition-all min-w-40 h-10"
+					if props.Type == utils.InputTypeMultiple {
+						multiple
+					}
+					if props.Required {
+						required
+					}
+				>
+					<option value="">{ props.Placeholder }</option>
+					for _, option := range props.Options {
+						<option
+							value={ option.Value }
+							if option.Value == props.Value {
+								selected
+							}
+						>
+							{ option.Label }
+						</option>
+					}
+				</select>
+			default:
+				<input
+					type={ props.Type }
+					id={ props.Name }
+					name={ props.Name }
+					placeholder={ props.Placeholder }
+					value={ props.Value }
+					class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-700 text-slate-100 placeholder-slate-400 focus:border-blue-500 focus:outline-none transition-all min-w-40 h-10"
+					if props.Required {
+						required
+					}
+				/>
+		}
+	</div>
+}

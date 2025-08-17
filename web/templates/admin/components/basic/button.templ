@@ -1,0 +1,81 @@
+package basic
+
+import (
+	"yourvoice/internal/utils"
+)
+
+type ButtonAction struct {
+	Label   string
+	OnClick templ.ComponentScript
+	Type    string
+	Icon    string
+	Style   string // Use Action style constants
+	Size    string // Use Size constants (defaults to medium)
+}
+
+type LinkAction struct {
+	Label string
+	Href  string
+	Icon  string
+	Style string // Use Action style constants
+	Size  string // Use Size constants (defaults to medium)
+}
+
+templ ActionButton(props ButtonAction) {
+	<button
+		onclick={ props.OnClick }
+		type={ props.Type }
+		class={
+			"inline-flex items-center justify-center font-medium rounded-md transition-colors cursor-pointer",
+			getActionSizeClass(props.Size),
+			props.Style,
+		}
+	>
+		if props.Icon != "" {
+			<span class={ getIconMarginClass(props.Size) }>{ props.Icon }</span>
+		}
+		{ props.Label }
+	</button>
+}
+
+templ ActionLink(props LinkAction) {
+	<a
+		href={ templ.SafeURL(props.Href) }
+		class={
+			"inline-flex items-center justify-center font-medium rounded-md transition-colors",
+			getActionSizeClass(props.Size),
+			props.Style,
+		}
+	>
+		if props.Icon != "" {
+			<span class={ getIconMarginClass(props.Size) }>{ props.Icon }</span>
+		}
+		{ props.Label }
+	</a>
+}
+
+func getActionSizeClass(size string) string {
+	switch size {
+	case utils.SizeSmall:
+		return "px-2 py-1 text-xs h-7"
+	case utils.SizeLarge:
+		return "px-6 py-3 text-base h-12"
+	case utils.SizeFull:
+		return "px-8 py-4 text-lg h-14"
+	default: // utils.SizeMedium or empty
+		return "px-4 py-2 text-sm h-10"
+	}
+}
+
+func getIconMarginClass(size string) string {
+	switch size {
+	case utils.SizeSmall:
+		return "mr-1"
+	case utils.SizeLarge:
+		return "mr-3"
+	case utils.SizeFull:
+		return "mr-4"
+	default: // utils.SizeMedium or empty
+		return "mr-2"
+	}
+}
