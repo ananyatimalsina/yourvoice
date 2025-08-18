@@ -50,7 +50,9 @@ templ Card(props CardProps) {
 					if props.Indicator != nil {
 						@StatusBadge(*props.Indicator)
 					}
-					@props.Action
+					if props.Action != nil {
+						@props.Action
+					}
 				</div>
 			</div>
 		}
