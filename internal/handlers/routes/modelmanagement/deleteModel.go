@@ -1,4 +1,4 @@
-package routes
+package modelmanagement
 
 import (
 	"encoding/json"
