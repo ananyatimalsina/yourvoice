@@ -22,13 +22,15 @@ type LinkAction struct {
 	Size  string // Use Size constants (defaults to medium)
 }
 
+const BasicActionStyle = "inline-flex items-center justify-center font-medium rounded-md transition-colors cursor-pointer"
+
 templ ActionButton(props ButtonAction) {
 	<button
 		id={ props.ID }
 		onclick={ props.OnClick }
 		type={ props.Type }
 		class={
-			"inline-flex items-center justify-center font-medium rounded-md transition-colors cursor-pointer",
+			BasicActionStyle,
 			getActionSizeClass(props.Size),
 			props.Style,
 		}
@@ -44,7 +46,7 @@ templ ActionLink(props LinkAction) {
 	<a
 		href={ templ.SafeURL(props.Href) }
 		class={
-			"inline-flex items-center justify-center font-medium rounded-md transition-colors",
+			BasicActionStyle,
 			getActionSizeClass(props.Size),
 			props.Style,
 		}
