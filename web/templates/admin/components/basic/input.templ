@@ -10,13 +10,8 @@ type InputProps struct {
 	Label       string
 	Placeholder string
 	Value       string
-	Options     []InputOption // For select type
+	Options     []utils.InputOption // For select type
 	Required    bool
-}
-
-type InputOption struct {
-	Value string
-	Label string
 }
 
 templ Input(props InputProps) {

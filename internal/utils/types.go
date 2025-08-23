@@ -46,3 +46,9 @@ type Event struct {
 	EndDate    time.Time     `json:"end_date" gorm:"not null"`
 	PrivateKey RSAPrivateKey `json:"private_key" gorm:"not null"`
 }
+
+// templ
+type InputOption struct {
+	Value string
+	Label string
+}
