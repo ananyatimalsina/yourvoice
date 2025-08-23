@@ -10,14 +10,16 @@ type DeleteModelRequest struct {
 	ID uint `json:"id" gorm:"primaryKey"`
 }
 
-func DeleteModel(w http.ResponseWriter, r *http.Request, db *gorm.DB, model any) {
+func DeleteModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, model *T) {
 	var request DeleteModelRequest
+	ctx := r.Context()
+
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, "Failed to read request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := db.Delete(model, request.ID).Error; err != nil {
+	if _, err := gorm.G[T](db).Where("id = ?", request.ID).Delete(ctx); err != nil {
 		http.Error(w, "Failed to delete model", http.StatusInternalServerError)
 		return
 	}
