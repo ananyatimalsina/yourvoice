@@ -1,4 +1,4 @@
-package middleware
+package modelmanagement
 
 import (
 	"github.com/gorilla/schema"
