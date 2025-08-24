@@ -8,10 +8,25 @@ const (
 	SizeFull   = "full"
 )
 
-// Card variant options
+// Input types
 const (
-	CardVariantDefault = "default"
-	CardVariantGrid    = "grid"
+	InputTypeText     = "text"
+	InputTypeSelect   = "select"
+	InputTypeMultiple = "multiple"
+	InputTypeDate     = "date"
+)
+
+// Dialog types
+const (
+	DialogTypeConfirm     = "confirm"
+	DialogTypeAcknowledge = "acknowledge"
+)
+
+// Page size options
+const (
+	PageSizeCompact     = 25
+	PageSizeComfortable = 100
+	PageSizeExpanded    = 500
 )
 
 // Action style options
@@ -49,18 +64,4 @@ const (
 	IndicatorStyleError   = "bg-red-900/50 text-red-300 border border-red-700"
 	IndicatorStyleInfo    = "bg-blue-900/50 text-blue-300 border border-blue-700"
 	IndicatorStyleDefault = "default"
-)
-
-// Input types
-const (
-	InputTypeText     = "text"
-	InputTypeSelect   = "select"
-	InputTypeMultiple = "multiple"
-	InputTypeDate     = "date"
-)
-
-// Dialog types
-const (
-	DialogTypeConfirm     = "confirm"
-	DialogTypeAcknowledge = "acknowledge"
 )

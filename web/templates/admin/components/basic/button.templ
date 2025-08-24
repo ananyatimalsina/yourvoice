@@ -4,27 +4,20 @@ import (
 	"yourvoice/internal/utils"
 )
 
-type ButtonAction struct {
-	ID      string // Optional ID for the button
-	Label   string
-	OnClick templ.ComponentScript
-	Type    string
-	Icon    string
-	Style   string // Use Action style constants
-	Size    string // Use Size constants (defaults to medium)
-}
-
-type LinkAction struct {
-	Label string
-	Href  string
-	Icon  string
-	Style string // Use Action style constants
-	Size  string // Use Size constants (defaults to medium)
+type ActionProps struct {
+	ID         string // Optional ID for the button
+	Label      string
+	OnClick    templ.ComponentScript
+	Type       string
+	Icon       string
+	Style      string           // Use Action style constants
+	Size       string           // Use Size constants (defaults to medium)
+	Attributes templ.Attributes // Additional HTML attributes
 }
 
 const BasicActionStyle = "inline-flex items-center justify-center font-medium rounded-md transition-colors cursor-pointer"
 
-templ ActionButton(props ButtonAction) {
+templ ActionButton(props ActionProps) {
 	<button
 		id={ props.ID }
 		onclick={ props.OnClick }
@@ -34,6 +27,7 @@ templ ActionButton(props ButtonAction) {
 			getActionSizeClass(props.Size),
 			props.Style,
 		}
+		{ props.Attributes... }
 	>
 		if props.Icon != "" {
 			<span class={ getIconMarginClass(props.Size) }>{ props.Icon }</span>
@@ -42,7 +36,15 @@ templ ActionButton(props ButtonAction) {
 	</button>
 }
 
-templ ActionLink(props LinkAction) {
+type LinkActionProps struct {
+	Label string
+	Href  string
+	Icon  string
+	Style string // Use Action style constants
+	Size  string // Use Size constants (defaults to medium)
+}
+
+templ ActionLink(props LinkActionProps) {
 	<a
 		href={ templ.SafeURL(props.Href) }
 		class={

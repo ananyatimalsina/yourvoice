@@ -10,7 +10,6 @@ type CardProps struct {
 	Indicator *Indicator
 	Action    templ.Component
 	Size      string // Use size constants
-	Variant   string // Use Card variant constants
 	Classes   string
 }
 
@@ -61,8 +60,6 @@ templ Card(props CardProps) {
 				templ.KV("p-4", props.Size == utils.SizeSmall),
 				templ.KV("p-6", props.Size == "" || props.Size == utils.SizeMedium),
 				templ.KV("p-8", props.Size == utils.SizeLarge),
-				templ.KV("space-y-4", props.Variant == "" || props.Variant == utils.CardVariantDefault),
-				templ.KV("grid gap-4", props.Variant == utils.CardVariantGrid),
 			}
 		>
 			{ children... }
