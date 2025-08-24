@@ -1,21 +1,21 @@
 package modelmanagement
 
 import (
-	"encoding/json"
+	"github.com/gorilla/schema"
 	"gorm.io/gorm"
 	"net/http"
 )
 
 type DeleteModelRequest struct {
-	ID uint `json:"id" gorm:"primaryKey"`
+	ID uint `json:"id" schema:"id,required"`
 }
 
 func DeleteModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, model *T) {
 	var request DeleteModelRequest
 	ctx := r.Context()
 
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Failed to read request body: "+err.Error(), http.StatusBadRequest)
+	if err := schema.NewDecoder().Decode(&request, r.URL.Query()); err != nil {
+		http.Error(w, "Failed to parse request data: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -24,7 +24,6 @@ func DeleteModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, mod
 		return
 	}
 
-	// TODO: Process the vote
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Model deleted successfully"))
 }
