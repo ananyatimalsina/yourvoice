@@ -10,8 +10,8 @@ import (
 )
 
 type Expression struct {
-	ID   uint   `json:"id" gorm:"primaryKey"`
-	Data string `json:"data" gorm:"not null"`
+	ID   uint   `json:"id" schema:"id" gorm:"primaryKey"`
+	Data string `json:"data" schema:"data,required" gorm:"not null"`
 }
 
 type RSAPrivateKey struct {
