@@ -2,11 +2,13 @@ package database
 
 import (
 	"fmt"
+	"os"
+	"yourvoice/internal/database/models"
+	"yourvoice/internal/utils"
+
 	"github.com/ananyatimalsina/schema"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"os"
-	"yourvoice/internal/database/models"
 )
 
 func LoadDatabase(decoder *schema.Decoder) *gorm.DB {
@@ -23,15 +25,19 @@ func LoadDatabase(decoder *schema.Decoder) *gorm.DB {
 }
 
 func migrateModels(db *gorm.DB, decoder *schema.Decoder) {
-	models.MigrateCandidate(db, decoder)
+	utils.RegisterJSONSlicePtr(decoder, []models.Candidate{})
+	utils.RegisterJSONSlicePtr(decoder, []*models.Candidate{})
+	utils.RegisterJSONSlicePtr(decoder, []models.Vote{})
+	utils.RegisterJSONSlicePtr(decoder, []*models.VoteEvent{})
+	utils.RegisterJSONSlicePtr(decoder, []models.Feedback{})
 	err := db.AutoMigrate(
 		&models.Party{},
+		&models.Candidate{},
+		&models.Vote{},
+		&models.VoteEvent{},
 		&models.FeedbackSession{},
+		&models.Feedback{},
 	)
-	models.MigrateVote(db, decoder)
-	models.MigrateVoteEvent(db, decoder)
-	models.MigrateFeedback(db, decoder)
-
 	if err != nil {
 		panic("failed to migrate models: " + err.Error())
 	}
