@@ -12,6 +12,7 @@ type InputProps struct {
 	Value       string
 	Options     []utils.InputOption // For select type
 	Required    bool
+	Attributes  templ.Attributes // Additional HTML attributes
 }
 
 templ Input(props InputProps) {
@@ -36,6 +37,7 @@ templ Input(props InputProps) {
 					if props.Required {
 						required
 					}
+					{ props.Attributes... }
 				>
 					<option value="">{ props.Placeholder }</option>
 					for _, option := range props.Options {
@@ -56,6 +58,7 @@ templ Input(props InputProps) {
 					name={ props.Name }
 					placeholder={ props.Placeholder }
 					value={ props.Value }
+					{ props.Attributes... }
 					class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-700 text-slate-100 placeholder-slate-400 focus:border-blue-500 focus:outline-none transition-all min-w-40 h-10"
 					if props.Required {
 						required

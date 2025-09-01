@@ -5,12 +5,13 @@ import (
 )
 
 type CardProps struct {
-	Title     string
-	Icon      string
-	Indicator *Indicator
-	Action    templ.Component
-	Size      string // Use size constants
-	Classes   string
+	Title           string
+	TitleAttributes templ.Attributes // Additional attributes for title element
+	Icon            string
+	Indicator       *Indicator
+	Action          templ.Component
+	Size            string // Use size constants
+	Classes         string
 }
 
 type StatCardProps struct {
@@ -42,7 +43,10 @@ templ Card(props CardProps) {
 						<span class="text-xl">{ props.Icon }</span>
 					}
 					if props.Title != "" {
-						<h3 class="text-lg font-semibold text-slate-100">{ props.Title }</h3>
+						<h3
+							{ props.TitleAttributes... }
+							class="text-lg font-semibold text-slate-100"
+						>{ props.Title }</h3>
 					}
 				</div>
 				<div class="flex items-center space-x-3">
