@@ -3,7 +3,7 @@ module yourvoice
 go 1.24.5
 
 require (
-	github.com/a-h/templ v0.3.937
+	github.com/a-h/templ v0.3.943
 	github.com/ananyatimalsina/schema v1.4.3
 	github.com/joho/godotenv v1.5.1
 	gorm.io/driver/postgres v1.6.0
