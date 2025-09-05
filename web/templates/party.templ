@@ -1,0 +1,26 @@
+package templates
+
+import (
+	"yourvoice/web/templates/components/table"
+)
+
+templ Party() {
+	@table.Table() {
+		@table.Header() {
+			@table.Row() {
+				@table.Head() {
+					Name 
+				}
+				@table.Head() {
+					Candidates	
+				}
+				@table.Head() {
+					Created At
+				}
+				@table.Head() {
+					Actions 
+				}
+			}
+		}
+	}
+}

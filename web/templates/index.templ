@@ -1,0 +1,143 @@
+package templates
+
+import (
+	"yourvoice/web/templates/components/sidebar"
+	"yourvoice/web/templates/components/popover"
+	"yourvoice/web/templates/components/icon"
+	"yourvoice/web/templates/components/collapsible"
+)
+
+templ Layout(Title string) {
+	<!DOCTYPE html>
+	<html lang="en" class="h-full">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ Title } - YourVoice Admin</title>
+			<link rel="stylesheet" href="/static/output.css"/>
+			<script defer src="/static/ajax.js"></script>
+			@sidebar.Script()
+			@popover.Script()
+			@collapsible.Script()
+		</head>
+		<body class="h-full">
+			<div class="flex h-full">
+				@sidebar.Layout() {
+					@sidebar.Sidebar(sidebar.Props{
+						Collapsible: sidebar.CollapsibleIcon,
+						Variant:     sidebar.VariantFloating,
+					}) {
+						@sidebar.Header() {
+							@sidebar.Menu() {
+								@sidebar.MenuItem() {
+									@sidebar.MenuButton(sidebar.MenuButtonProps{Href: "/admin"}) {
+										@icon.House(icon.Props{Class: "size-4"})
+										<span class="font-semibold">YourVoice Admin</span>
+									}
+								}
+							}
+						}
+						@sidebar.Content() {
+							@sidebar.Group() {
+								@sidebar.GroupLabel() {
+									Voting System
+								}
+								@sidebar.MenuItem() {
+									@collapsible.Collapsible(collapsible.Props{Open: true, Class: "group/collapsible w-full"}) {
+										@collapsible.Trigger() {
+											@sidebar.MenuButton(sidebar.MenuButtonProps{Tooltip: "Manage Voting System"}) {
+												@icon.Database(icon.Props{Class: "size-4"})
+												<span>CRM</span>
+												@icon.ChevronRight(icon.Props{
+													Class: "ml-auto size-4 transition-transform group-data-[tui-collapsible-state=open]/collapsible:rotate-90",
+												})
+											}
+										}
+										@collapsible.Content() {
+											@sidebar.MenuSub() {
+												@sidebar.MenuSubItem() {
+													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
+														Attributes: templ.Attributes{
+															"onclick": "ajax('/admin/votes/events', {target: 'main', swap: 'update'})",
+														},
+													}) {
+														<span>Events</span>
+													}
+												}
+												@sidebar.MenuSubItem() {
+													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
+														Attributes: templ.Attributes{
+															"onclick": "ajax('/admin/votes/parties', {target: 'main', swap: 'update'})",
+														},
+													}) {
+														<span>Parties</span>
+													}
+												}
+												@sidebar.MenuSubItem() {
+													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
+														Href: "/admin/votes/candidates",
+													}) {
+														<span>Candidates</span>
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+							@sidebar.Separator()
+							@sidebar.Group() {
+								@sidebar.GroupLabel() {
+									Feedback System
+								}
+								@sidebar.MenuItem() {
+									@collapsible.Collapsible(collapsible.Props{Open: true, Class: "group/collapsible w-full"}) {
+										@collapsible.Trigger() {
+											@sidebar.MenuButton(sidebar.MenuButtonProps{Tooltip: "Manage Feedback System"}) {
+												@icon.Database(icon.Props{Class: "size-4"})
+												<span>CRM</span>
+												@icon.ChevronRight(icon.Props{
+													Class: "ml-auto size-4 transition-transform group-data-[tui-collapsible-state=open]/collapsible:rotate-90",
+												})
+											}
+										}
+										@collapsible.Content() {
+											@sidebar.MenuSub() {
+												@sidebar.MenuSubItem() {
+													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
+														Href: "/admin/feedback/sessions",
+													}) {
+														<span>Sessions</span>
+													}
+												}
+												@sidebar.MenuSubItem() {
+													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
+														Href: "/admin/feedback/messages",
+													}) {
+														<span>Messages</span>
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					@sidebar.Inset() {
+						<div class="flex flex-col h-full">
+							<div class="flex gap-4 items-center px-6 h-14">
+								@sidebar.Trigger()
+								<span class="text-sm text-muted-foreground">Press Ctrl+B to toggle sidebar</span>
+							</div>
+							<div class="flex-1 p-6"></div>
+						</div>
+					}
+				}
+				<main id="main" class="overflow-auto flex-1">
+					{ children... }
+				</main>
+			</div>
+		</body>
+	</html>
+}
