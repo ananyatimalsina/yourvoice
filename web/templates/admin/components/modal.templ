@@ -1,0 +1,241 @@
+package components
+
+import (
+	"reflect"
+	"strings"
+	"strconv"
+	"yourvoice/web/templates/admin/components/basic"
+	"yourvoice/internal/utils"
+)
+
+type ModalProps struct {
+	Open               bool
+	Model              interface{}         // The model struct (nil for add, populated for edit)
+	RelationshipFields []RelationshipField // Custom relationship fields
+}
+
+type RelationshipField struct {
+	Name    string
+	Label   string
+	Type    string // utils.InputTypeMultiple, etc.
+	Options []utils.InputOption
+}
+
+templ Modal(Title string, props ModalProps) {
+	<div
+		x-cloak
+		x-show="modal.Open"
+		class="fixed inset-0 z-40 bg-black/80"
+	></div>
+	<!-- Modal container -->
+	<div
+		x-cloak
+		x-show="modal.Open"
+		x-on:click="modal.Open = false"
+		class="flex fixed inset-0 z-50 justify-center items-center p-4"
+	>
+		<div onclick="event.stopPropagation()">
+			@basic.Card(
+				basic.CardProps{
+					Title:           "include",
+					TitleAttributes: templ.Attributes{"x-text": "modal.Model === null ? 'Add ' + '" + Title + "' : 'Edit ' + '" + Title + "'"},
+					Action: basic.ActionButton(basic.ActionProps{
+						Label: "x",
+						Style: utils.ActionStyleSecondary,
+						Attributes: templ.Attributes{
+							"x-on:click": "modal.Open = false",
+						},
+					}),
+				},
+			) {
+				<form
+					class="space-y-4"
+					x-ref="modalform"
+				>
+					<!-- Generate form fields from struct -->
+					for _, field := range getFormFields(props.Model) {
+						@basic.Input(field)
+					}
+					<!-- Add custom relationship fields -->
+					for _, relField := range props.RelationshipFields {
+						@basic.Input(basic.InputProps{
+							Name:    relField.Name,
+							Label:   relField.Label,
+							Type:    relField.Type,
+							Options: relField.Options,
+							Attributes: templ.Attributes{
+								"x-model": "modal.Model." + relField.Name,
+							},
+						})
+					}
+					<!-- Visual seperator -->
+					<hr class="mb-2 border-t border-slate-600"/>
+					<div class="flex justify-end pt-4 space-x-3">
+						@basic.ActionButton(basic.ActionProps{Label: "Cancel", Type: "button", Style: utils.ActionStyleSecondary, Attributes: templ.Attributes{"x-on:click": "modal.Open = false", "formnoajax": "true"}})
+						@basic.ActionButton(basic.ActionProps{Label: "Save", Type: "button", Style: utils.ActionStylePrimary, Attributes: templ.Attributes{"x-on:click": "$refs.tbody.setAttribute('x-merge', 'append'); $ajax('', {method: modal.Model != null ? 'put' : 'post', target: modal.Model != null ? 'row-' + modal.Model.ID : 'data-table', body: modal.Model != null ? modal.Model : new FormData($refs.modalform)}); modal.Open = false", "@ajax:success": "if (modal.Model == null) {pagination.TotalItems += 1}", "@ajax:error": "Object.assign(dialog, {Active: true, Type: '" + utils.DialogTypeAcknowledge + "', Style: '" + utils.ActionStyleDanger + "', Title: 'Error', Message: 'Failed to save ' + (modal.Model?.name || 'Model') + '. Reason: ' + ($event.detail.raw || 'Unknown Error')})", "formnoajax": "true"}})
+					</div>
+				</form>
+			}
+		</div>
+	</div>
+}
+
+func getFormFields(model interface{}) []basic.InputProps {
+	var fields []basic.InputProps
+	val := reflect.ValueOf(model)
+	typ := reflect.TypeOf(model)
+
+	// Handle pointer types
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+		typ = typ.Elem()
+	}
+
+	// Extract fields from struct (including embedded structs)
+	extractedFields := extractStructFields(val, typ, "")
+
+	for _, fieldInfo := range extractedFields {
+		// Skip unexported fields
+		if !fieldInfo.StructField.IsExported() {
+			continue
+		}
+
+		// Skip embedded gorm.Model fields we don't want in forms
+		if strings.Contains(fieldInfo.StructField.Name, "ID") || fieldInfo.StructField.Name == "CreatedAt" ||
+			fieldInfo.StructField.Name == "UpdatedAt" || fieldInfo.StructField.Name == "DeletedAt" {
+			continue
+		}
+
+		// Skip slice/array fields (like relationships)
+		if fieldInfo.Value.Kind() == reflect.Slice || fieldInfo.Value.Kind() == reflect.Array {
+			continue
+		}
+
+		// Create form field
+		field := basic.InputProps{
+			Name:        fieldInfo.StructField.Tag.Get("json"),
+			Label:       formatFieldLabel(fieldInfo.StructField.Name),
+			Value:       getFieldValue(fieldInfo.Value),
+			Required:    isFieldRequired(fieldInfo.StructField),
+			Type:        getFieldType(fieldInfo.StructField),
+			Placeholder: getFieldPlaceholder(fieldInfo.StructField.Name),
+			Attributes: templ.Attributes{
+				"x-model": "modal.Model." + fieldInfo.StructField.Tag.Get("json"),
+			},
+		}
+
+		fields = append(fields, field)
+	}
+
+	return fields
+}
+
+type FieldInfo struct {
+	StructField reflect.StructField
+	Value       reflect.Value
+}
+
+func extractStructFields(val reflect.Value, typ reflect.Type, prefix string) []FieldInfo {
+	var fields []FieldInfo
+
+	for i := 0; i < val.NumField(); i++ {
+		fieldType := typ.Field(i)
+		fieldValue := val.Field(i)
+
+		// Skip unexported fields
+		if !fieldType.IsExported() {
+			continue
+		}
+
+		// Handle embedded structs (Anonymous fields)
+		if fieldType.Anonymous {
+			// Handle pointer to embedded struct
+			if fieldValue.Kind() == reflect.Ptr {
+				if !fieldValue.IsNil() {
+					fieldValue = fieldValue.Elem()
+				} else {
+					continue
+				}
+			}
+
+			// If it's a struct, extract its fields recursively
+			if fieldValue.Kind() == reflect.Struct {
+				embeddedFields := extractStructFields(fieldValue, fieldValue.Type(), prefix)
+				fields = append(fields, embeddedFields...)
+				continue
+			}
+		}
+
+		// Regular field
+		fields = append(fields, FieldInfo{
+			StructField: fieldType,
+			Value:       fieldValue,
+		})
+	}
+
+	return fields
+}
+
+func formatFieldLabel(fieldName string) string {
+	// Convert camelCase to "Title Case"
+	result := ""
+	for i, r := range fieldName {
+		if i > 0 && r >= 'A' && r <= 'Z' {
+			result += " "
+		}
+		result += string(r)
+	}
+	return result
+}
+
+func getFieldValue(fieldValue reflect.Value) string {
+	switch fieldValue.Kind() {
+	case reflect.String:
+		return fieldValue.String()
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return strconv.FormatInt(fieldValue.Int(), 10)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return strconv.FormatUint(fieldValue.Uint(), 10)
+	default:
+		return ""
+	}
+}
+
+func isFieldRequired(fieldType reflect.StructField) bool {
+	// Check GORM tags for "not null"
+	gormTag := fieldType.Tag.Get("gorm")
+	return strings.Contains(gormTag, "not null")
+}
+
+func getFieldType(fieldType reflect.StructField) string {
+	fieldName := strings.ToLower(fieldType.Name)
+
+	if strings.Contains(fieldName, "description") ||
+		strings.Contains(fieldName, "message") ||
+		strings.Contains(fieldName, "content") {
+		return "textarea"
+	}
+
+	if strings.Contains(fieldName, "date") ||
+		strings.Contains(fieldName, "time") ||
+		fieldType.Type.String() == "time.Time" {
+		return "date"
+	}
+
+	return "text"
+}
+
+func getFieldPlaceholder(fieldName string) string {
+	switch strings.ToLower(fieldName) {
+	case "name":
+		return "Enter name"
+	case "platform":
+		return "Enter link"
+	case "description":
+		return "Enter description"
+	case "email":
+		return "Enter email address"
+	default:
+		return "Enter " + strings.ToLower(fieldName)
+	}
+}
