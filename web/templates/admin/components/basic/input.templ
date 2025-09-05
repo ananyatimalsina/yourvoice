@@ -5,20 +5,21 @@ import (
 )
 
 type InputProps struct {
-	Type        string // utils.FilterItemType
+	Type        string // utils.InputType
 	Name        string
 	Label       string
 	Placeholder string
 	Value       string
 	Options     []utils.InputOption // For select type
 	Required    bool
+	Classes     string
 	Attributes  templ.Attributes // Additional HTML attributes
 }
 
 templ Input(props InputProps) {
 	<div class="w-full">
 		if props.Label != "" {
-			<label for={ props.Name } class="block text-sm font-medium text-slate-300 mb-2">
+			<label for={ props.Name } class="block mb-2 text-sm font-medium text-slate-300">
 				{ props.Label }
 				if props.Required {
 					<span class="text-red-400">*</span>
@@ -30,7 +31,7 @@ templ Input(props InputProps) {
 				<select
 					id={ props.Name }
 					name={ props.Name }
-					class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-700 text-slate-100 focus:border-blue-500 focus:outline-none transition-all min-w-40 h-10"
+					class={ "py-2 px-3  h-10 rounded-lg border transition-all focus:border-blue-500 focus:outline-none border-slate-600 bg-slate-700 text-slate-100", templ.KV("min-w-40", props.Classes == ""), props.Classes }
 					if props.Type == utils.InputTypeMultiple {
 						multiple
 					}
@@ -59,7 +60,7 @@ templ Input(props InputProps) {
 					placeholder={ props.Placeholder }
 					value={ props.Value }
 					{ props.Attributes... }
-					class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-700 text-slate-100 placeholder-slate-400 focus:border-blue-500 focus:outline-none transition-all min-w-40 h-10"
+					class={ "px-3 py-2 h-10 rounded-lg border transition-all focus:border-blue-500 focus:outline-none border-slate-600 bg-slate-700 text-slate-100 placeholder-slate-400", templ.KV("min-w-40", props.Classes == ""), props.Classes }
 					if props.Required {
 						required
 					}
