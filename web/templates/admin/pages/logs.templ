@@ -1,0 +1,209 @@
+package pages
+
+import (
+	"yourvoice/web/templates/admin/components/basic"
+	"yourvoice/web/templates/admin/components"
+	"yourvoice/web/templates/admin"
+	"yourvoice/internal/utils"
+)
+
+templ SystemLogs() {
+	@admin.Layout("System Logs") {
+		<div class="p-4 sm:p-6 lg:p-8">
+			<!-- Security & Audit Trail -->
+			@basic.Card(basic.CardProps{
+				Title:     "Security & Audit Trail",
+				Icon:      "🔒",
+				Indicator: &basic.Indicator{Text: "All Systems Secure", Style: utils.IndicatorStyleSuccess},
+			}) {
+				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+					@basic.StatCard(basic.StatCardProps{
+						Title:    "Failed Login Attempts",
+						Value:    "12",
+						Icon:     "🚨",
+						Subtitle: "Last 24 hours",
+						Trend:    &basic.Trend{Value: -15, Positive: false},
+					})
+					@basic.StatCard(basic.StatCardProps{
+						Title:    "Security Alerts",
+						Value:    "3",
+						Icon:     "⚠️",
+						Subtitle: "Requires admin attention",
+						Trend:    &basic.Trend{Value: -25, Positive: false},
+					})
+					@basic.StatCard(basic.StatCardProps{
+						Title:    "Active Sessions",
+						Value:    "47",
+						Icon:     "👥",
+						Subtitle: "Current user connections",
+						Trend:    &basic.Trend{Value: 12, Positive: true},
+					})
+				</div>
+			}
+			<!-- System Activity Logs -->
+			<div class="mt-6 sm:mt-8">
+				@basic.Card(basic.CardProps{
+					Title:  "System Activity Logs",
+					Icon:   "📋",
+					Action: basic.ActionLink(basic.LinkActionProps{Label: "Export Logs", Href: "/admin/logs/export", Icon: "📊", Style: utils.ActionStylePrimary}),
+				}) {
+					<!-- Filter Bar -->
+					@components.FilterBar(components.FilterBarProps{
+						Filters: []basic.InputProps{
+							{
+								Type:        "select",
+								Name:        "type",
+								Placeholder: "All Types",
+								Options: []utils.InputOption{
+									{Value: "vote", Label: "Votes"},
+									{Value: "message", Label: "Messages"},
+									{Value: "event", Label: "Events"},
+									{Value: "verification", Label: "Verifications"},
+									{Value: "system", Label: "System"},
+									{Value: "security", Label: "Security"},
+								},
+							},
+							{
+								Type:        "select",
+								Name:        "timeframe",
+								Placeholder: "All Time",
+								Options: []utils.InputOption{
+									{Value: "today", Label: "Today"},
+									{Value: "week", Label: "This Week"},
+									{Value: "month", Label: "This Month"},
+									{Value: "quarter", Label: "This Quarter"},
+								},
+							},
+							{
+								Type:        "select",
+								Name:        "severity",
+								Placeholder: "All Severities",
+								Options: []utils.InputOption{
+									{Value: "info", Label: "Info"},
+									{Value: "success", Label: "Success"},
+									{Value: "warning", Label: "Warning"},
+									{Value: "error", Label: "Error"},
+								},
+							},
+						},
+					})
+					<!-- Activity Log List -->
+					@ActivityLogListView()
+				}
+			</div>
+		</div>
+	}
+}
+
+// Activity Log List View Component
+templ ActivityLogListView() {
+	<div class="space-y-3">
+		@ActivityLogItem(ActivityLogProps{
+			Icon:        "🗳️",
+			Description: "New vote cast in Presidential Election 2024",
+			User:        "Anonymous User",
+			Time:        "2 minutes ago",
+			Indicator: basic.Indicator{
+				Text:  "vote",
+				Style: utils.IndicatorStyleSuccess,
+			},
+		})
+		@ActivityLogItem(ActivityLogProps{
+			Icon:        "💬",
+			Description: "New message submitted to Community Feedback Session",
+			User:        "Anonymous User",
+			Time:        "5 minutes ago",
+			Indicator: basic.Indicator{
+				Text:  "message",
+				Style: utils.IndicatorStyleInfo,
+			},
+		})
+		@ActivityLogItem(ActivityLogProps{
+			Icon:        "🔐",
+			Description: "Vote verification completed for 50 ballots",
+			User:        "System",
+			Time:        "15 minutes ago",
+			Indicator: basic.Indicator{
+				Text:  "verification",
+				Style: utils.IndicatorStyleSuccess,
+			},
+		})
+		@ActivityLogItem(ActivityLogProps{
+			Icon:        "⚠️",
+			Description: "High memory usage detected on server node-2",
+			User:        "System Monitor",
+			Time:        "1 hour ago",
+			Indicator: basic.Indicator{
+				Text:  "system",
+				Style: utils.IndicatorStyleWarning,
+			},
+		})
+		@ActivityLogItem(ActivityLogProps{
+			Icon:        "📅",
+			Description: "Climate Action Plan Input event started",
+			User:        "System",
+			Time:        "2 hours ago",
+			Indicator: basic.Indicator{
+				Text:  "event",
+				Style: utils.IndicatorStyleInfo,
+			},
+		})
+		@ActivityLogItem(ActivityLogProps{
+			Icon:        "🚨",
+			Description: "Failed login attempt detected from suspicious IP",
+			User:        "Security System",
+			Time:        "3 hours ago",
+			Indicator: basic.Indicator{
+				Text:  "security",
+				Style: utils.IndicatorStyleError,
+			},
+		})
+	</div>
+}
+
+// Activity Log Item Props
+type ActivityLogProps struct {
+	Icon        string
+	Description string
+	User        string
+	Time        string
+	Indicator   basic.Indicator
+}
+
+// Individual Activity Log Item
+templ ActivityLogItem(props ActivityLogProps) {
+	<div class="flex items-start space-x-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600 hover:bg-slate-700 transition-colors">
+		<!-- Activity Icon -->
+		@basic.Icon(basic.IconProps{
+			Icon: props.Icon,
+			Size: utils.SizeSmall,
+		})
+		<!-- Activity Content -->
+		<div class="flex-1 min-w-0">
+			<div class="flex items-center justify-between">
+				<div class="flex-1">
+					<p class="text-sm font-medium text-slate-100">{ props.Description }</p>
+					<div class="flex items-center space-x-4 mt-1 text-xs text-slate-400">
+						<span class="flex items-center space-x-1">
+							<span class="font-medium">User:</span>
+							<span>{ props.User }</span>
+						</span>
+						<span class="flex items-center space-x-1">
+							<span class="font-medium">Time:</span>
+							<span>{ props.Time }</span>
+						</span>
+					</div>
+				</div>
+				<!-- Activity Actions -->
+				<div class="flex items-center space-x-3 ml-4">
+					@basic.StatusBadge(props.Indicator)
+					@basic.ActionLink(basic.LinkActionProps{
+						Label: "View Details",
+						Href:  "/admin/logs/details?activity=" + props.Description,
+						Style: utils.ActionStyleGhost,
+					})
+				</div>
+			</div>
+		</div>
+	</div>
+}
