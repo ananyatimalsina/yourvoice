@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"github.com/a-h/templ"
 	"github.com/ananyatimalsina/schema"
 	"gorm.io/gorm"
 	"reflect"
@@ -22,6 +23,7 @@ func RegisterJSONSlicePtr[T any](decoder *schema.Decoder, example []T) {
 	})
 }
 
+// Fix umlauts being a problem
 func BuildRelationshipFieldInputOptions(db *gorm.DB, modelType any) []InputOption {
 	sliceType := reflect.SliceOf(reflect.TypeOf(modelType))
 	modelsSlice := reflect.New(sliceType).Interface()
@@ -102,4 +104,12 @@ func BuildRelationshipFieldInputOptions(db *gorm.DB, modelType any) []InputOptio
 	}
 
 	return options
+}
+
+func GetJSONString(v any) string {
+	jsonStr, err := templ.JSONString(v)
+	if err != nil {
+		return "null"
+	}
+	return jsonStr
 }
