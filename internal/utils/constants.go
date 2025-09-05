@@ -14,6 +14,7 @@ const (
 	InputTypeSelect   = "select"
 	InputTypeMultiple = "multiple"
 	InputTypeDate     = "date"
+	InputTypeNumber   = "number"
 )
 
 // Dialog types
