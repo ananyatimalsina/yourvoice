@@ -1,0 +1,138 @@
+package components
+
+import (
+	"strconv"
+	"yourvoice/internal/utils"
+	"yourvoice/web/templates/admin/components/basic"
+)
+
+type PaginationProps struct {
+	CurrentPage  int   `json:"CurrentPage"`
+	TotalItems   int64 `json:"TotalItems"`
+	ItemsPerPage int   `json:"ItemsPerPage"`
+}
+
+templ Pagination(props PaginationProps) {
+	<div class="py-4 px-6 rounded-lg border bg-slate-800 border-slate-700">
+		<div class="flex flex-col justify-between items-center space-y-4 sm:flex-row sm:space-y-0">
+			<!-- Item count display -->
+			<div class="text-sm text-slate-300">
+				Showing <span x-text="(pagination.CurrentPage-1) * pagination.ItemsPerPage + (pagination.TotalItems > 0 ? 1 : 0)"></span> to <span x-text="(pagination.CurrentPage-1) * pagination.ItemsPerPage + pagination.RowCount"></span> of <span x-text="pagination.TotalItems"></span> entries			
+			</div>
+			<!-- Pagination controls -->
+			<div class="flex items-center space-x-2">
+				<!-- Go to page input -->
+				<div class="items-center mr-4 space-x-2 md:flex" x-show="pagination.TotalPages > 1" x-cloak>
+					<span class="text-sm text-slate-300">Go to:</span>
+					<input
+						type="number"
+						min="1"
+						:max="pagination.TotalPages"
+						x-model.number="pagination.CurrentPage"
+						onchange="goToPage(this.value)"
+						class="py-1 px-2 w-16 text-sm rounded border focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-700 border-slate-600 text-slate-200"
+					/>
+				</div>
+				<!-- Previous page button -->
+				<!-- First page button -->
+				@basic.ActionButton(basic.ActionProps{
+					Label:   "First",
+					OnClick: templ.JSFuncCall("goToPage", 1),
+					Style:   utils.ActionStyleSecondary,
+					Size:    utils.SizeSmall,
+					Attributes: templ.Attributes{
+						"x-show":  "pagination.CurrentPage > 1",
+						"x-cloak": "",
+					},
+				})
+				@basic.ActionButton(basic.ActionProps{
+					Label:   "Prev",
+					OnClick: templ.JSFuncCall("goToPage", props.CurrentPage-1),
+					Style:   utils.ActionStyleSecondary,
+					Size:    utils.SizeSmall,
+					Attributes: templ.Attributes{
+						"x-show":  "pagination.CurrentPage > 1",
+						"x-cloak": "",
+					},
+				})
+				<!-- Page number buttons with truncation -->
+				@PaginationNumbers(props)
+				<!-- Next page button -->
+				@basic.ActionButton(basic.ActionProps{
+					Label:   "Next",
+					OnClick: templ.JSFuncCall("goToPage", props.CurrentPage+1),
+					Style:   utils.ActionStyleSecondary,
+					Size:    utils.SizeSmall,
+					Attributes: templ.Attributes{
+						"x-show":  "pagination.CurrentPage < pagination.TotalPages",
+						"x-cloak": "",
+					},
+				})
+				@basic.ActionButton(basic.ActionProps{
+					Label:   "Last",
+					OnClick: templ.JSFuncCall("goToPage", props.TotalPages),
+					Style:   utils.ActionStyleSecondary,
+					Size:    utils.SizeSmall,
+					Attributes: templ.Attributes{
+						"x-show":  "pagination.CurrentPage < pagination.TotalPages",
+						"x-cloak": "",
+					},
+				})
+				<!-- Last page button -->
+			</div>
+		</div>
+	</div>
+}
+
+templ PaginationNumbers(props PaginationProps) {
+	<!-- Page numbers with smart truncation -->
+	if props.TotalPages <= 7 {
+		<!-- Show all pages if 7 or fewer -->
+		for i := 1; i <= props.TotalPages; i++ {
+			@PaginationButton(i, props.CurrentPage)
+		}
+	} else {
+		<!-- Complex truncation logic -->
+		if props.CurrentPage <= 4 {
+			<!-- Show: 1 2 3 4 5 ... Last -->
+			for i := 1; i <= 5; i++ {
+				@PaginationButton(i, props.CurrentPage)
+			}
+			<span class="py-1 px-2 text-slate-400">…</span>
+			@PaginationButton(props.TotalPages, props.CurrentPage)
+		} else if props.CurrentPage >= props.TotalPages-3 {
+			<!-- Show: 1 ... N-4 N-3 N-2 N-1 N -->
+			@PaginationButton(1, props.CurrentPage)
+			<span class="py-1 px-2 text-slate-400">…</span>
+			for i := props.TotalPages - 4; i <= props.TotalPages; i++ {
+				@PaginationButton(i, props.CurrentPage)
+			}
+		} else {
+			<!-- Show: 1 ... Current-1 Current Current+1 ... Last -->
+			@PaginationButton(1, props.CurrentPage)
+			<span class="py-1 px-2 text-slate-400">…</span>
+			for i := props.CurrentPage - 1; i <= props.CurrentPage + 1; i++ {
+				@PaginationButton(i, props.CurrentPage)
+			}
+			<span class="py-1 px-2 text-slate-400">…</span>
+			@PaginationButton(props.TotalPages, props.CurrentPage)
+		}
+	}
+}
+
+templ PaginationButton(page int, currentPage int) {
+	if page == currentPage {
+		@basic.ActionButton(basic.ActionProps{
+			Label: strconv.Itoa(page),
+			Style: utils.ActionStylePrimary,
+			Size:  utils.SizeSmall,
+		})
+	} else {
+		@basic.ActionButton(basic.ActionProps{
+			Label:   strconv.Itoa(page),
+			OnClick: templ.JSFuncCall("goToPage", page),
+			Style:   utils.ActionStyleSecondary,
+			Size:    utils.SizeSmall,
+		})
+	}
+}
