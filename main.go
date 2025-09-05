@@ -22,7 +22,6 @@ func main() {
 	router := http.NewServeMux()
 
 	stack := middleware.CreateStack(
-		middleware.LogOriginalURL,
 		middleware.Logging,
 	)
 
