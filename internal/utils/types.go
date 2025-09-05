@@ -10,7 +10,7 @@ import (
 )
 
 type Expression struct {
-	ID   uint   `json:"id" schema:"id" gorm:"primaryKey"`
+	ID   uint   `json:"ID" schema:"ID" gorm:"primaryKey"`
 	Data string `json:"data" schema:"data,required" gorm:"not null"`
 }
 
