@@ -8,7 +8,7 @@ import (
 	"yourvoice/web/templates/admin/components"
 )
 
-func EditModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decoder *schema.Decoder, model *T, mkRow func(model any) components.RowProps, actions []templ.Component, options ...bool) {
+func EditModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decoder *schema.Decoder, model *T, mkRow func(model any) components.RowProps, actions []templ.Component, options [2]bool) {
 	var request T
 	ctx := r.Context()
 
@@ -44,6 +44,6 @@ func EditModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decod
 		return
 	}
 
-	components.Row(mkRow(updatedModel), actions, options...).Render(ctx, w)
+	components.Row(mkRow(updatedModel), actions, options).Render(ctx, w)
 
 }

@@ -8,7 +8,7 @@ import (
 	"yourvoice/web/templates/admin/components"
 )
 
-func CreateModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decoder *schema.Decoder, model *T, mkRow func(model any) components.RowProps, actions []templ.Component, options ...bool) {
+func CreateModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decoder *schema.Decoder, model *T, mkRow func(model any) components.RowProps, actions []templ.Component, options [2]bool) {
 	var request T
 	ctx := r.Context()
 
@@ -31,5 +31,5 @@ func CreateModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, dec
 
 	components.TBody(components.TBodyProps{
 		Rows: []components.RowProps{row},
-	}).Render(ctx, w)
+	}, [3]bool{options[0], options[1], false}).Render(ctx, w)
 }
