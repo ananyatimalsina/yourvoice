@@ -2,9 +2,11 @@ package templates
 
 import (
 	"yourvoice/web/templates/components/sidebar"
+	"yourvoice/web/templates/components/dropdown"
 	"yourvoice/web/templates/components/popover"
 	"yourvoice/web/templates/components/icon"
 	"yourvoice/web/templates/components/collapsible"
+	"yourvoice/web/templates/components/label"
 )
 
 templ Layout(Title string) {
@@ -17,13 +19,16 @@ templ Layout(Title string) {
 			<link rel="stylesheet" href="/static/output.css"/>
 			<script defer src="/static/ajax.js"></script>
 			@sidebar.Script()
+			@dropdown.Script()
 			@popover.Script()
 			@collapsible.Script()
+			@label.Script()
 		</head>
 		<body class="h-full">
 			<div class="flex h-full">
 				@sidebar.Layout() {
 					@sidebar.Sidebar(sidebar.Props{
+						ID:          "sidebar",
 						Collapsible: sidebar.CollapsibleIcon,
 						Variant:     sidebar.VariantFloating,
 					}) {
@@ -123,15 +128,6 @@ templ Layout(Title string) {
 								}
 							}
 						}
-					}
-					@sidebar.Inset() {
-						<div class="flex flex-col h-full">
-							<div class="flex gap-4 items-center px-6 h-14">
-								@sidebar.Trigger()
-								<span class="text-sm text-muted-foreground">Press Ctrl+B to toggle sidebar</span>
-							</div>
-							<div class="flex-1 p-6"></div>
-						</div>
 					}
 				}
 				<main id="main" class="overflow-auto flex-1">

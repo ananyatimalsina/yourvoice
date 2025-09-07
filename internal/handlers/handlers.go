@@ -50,9 +50,7 @@ func LoadHanders(router *http.ServeMux, db *gorm.DB, decoder *schema.Decoder) {
 	adminVoteRouter := http.NewServeMux()
 
 	// Party management
-	adminVoteRouter.HandleFunc("/parties", func(w http.ResponseWriter, r *http.Request) {
-		views.Parties(w, r, db)
-	})
+	views.RegisterPartyRoutes(adminVoteRouter, db)
 
 	adminRouter.Handle("/votes/", http.StripPrefix("/votes", adminVoteRouter))
 

@@ -5,10 +5,9 @@ import (
 	"github.com/ananyatimalsina/schema"
 	"gorm.io/gorm"
 	"net/http"
-	"yourvoice/web/templates/admin/components"
 )
 
-func EditModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decoder *schema.Decoder, model *T, mkRow func(model any) components.RowProps, actions []templ.Component, options [2]bool) {
+func EditModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decoder *schema.Decoder, model *T, actions []templ.Component, options [2]bool) {
 	var request T
 	ctx := r.Context()
 
@@ -37,13 +36,4 @@ func EditModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decod
 		http.Error(w, "Failed to edit model", http.StatusInternalServerError)
 		return
 	}
-
-	updatedModel, err := gorm.G[T](db).Where("id = ?", id).First(ctx)
-	if err != nil {
-		http.Error(w, "Failed to fetch updated model", http.StatusInternalServerError)
-		return
-	}
-
-	components.Row(mkRow(updatedModel), actions, options).Render(ctx, w)
-
 }

@@ -1,0 +1,138 @@
+package templates
+
+import (
+	"yourvoice/web/templates/components/table"
+	"yourvoice/web/templates/components/sidebar"
+	"yourvoice/web/templates/components/checkbox"
+	"yourvoice/web/templates/components/label"
+	"yourvoice/web/templates/components/button"
+	"yourvoice/web/templates/components/icon"
+	"strings"
+	"yourvoice/web/templates/components/dropdown"
+)
+
+type ModelManagerProps struct {
+	Title   string
+	Headers []string
+	Rows    []RowProps
+}
+
+type RowProps struct {
+	Model any
+	Cells []string
+}
+
+templ ModelManager(props ModelManagerProps) {
+	@sidebar.Inset() {
+		<div class="flex flex-col h-full">
+			<div class="flex gap-4 items-center px-6 h-14">
+				@sidebar.Trigger(sidebar.TriggerProps{Target: "sidebar"})
+				<span id>{ props.Title }</span>
+			</div>
+			@sidebar.Separator()
+			<div class="flex-1 p-6"></div>
+		</div>
+	}
+	@templ.Fragment("datatable") {
+		@table.Table() {
+			@table.Header() {
+				@table.Row() {
+					for i, header := range props.Headers {
+						if i == 0 {
+							{{ headerID := strings.ReplaceAll(strings.ToLower(header), " ", "_") }}
+							@table.Head() {
+								<div class="flex gap-2 items-center">
+									@checkbox.Checkbox(checkbox.Props{
+										ID:    headerID,
+										Name:  headerID,
+										Value: headerID,
+									})
+									@label.Label(label.Props{
+										For: headerID,
+									}) {
+										{ header }
+									}
+								</div>
+							}
+						} else {
+							@table.Head() {
+								{ header }
+							}
+						}
+					}
+					@table.Head() {
+						@Dropdown()
+					}
+				}
+			}
+			@table.Header() {
+				for _, row := range props.Rows {
+					@table.Row() {
+						for i, cell := range row.Cells {
+							if i == 0 {
+								{{ cellID := strings.ReplaceAll(strings.ToLower(cell), " ", "_") }}
+								@table.Cell() {
+									<div class="flex gap-2 items-center">
+										@checkbox.Checkbox(checkbox.Props{
+											ID:    cellID,
+											Name:  cellID,
+											Value: cellID,
+										})
+										@label.Label(label.Props{
+											For: cellID,
+										}) {
+											{ cell }
+										}
+									</div>
+								}
+							} else {
+								@table.Cell() {
+									{ cell }
+								}
+							}
+						}
+						@table.Cell() {
+							@Dropdown()
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+templ Dropdown() {
+	@dropdown.Dropdown() {
+		@dropdown.Trigger() {
+			@button.Button(button.Props{
+				Size:    button.SizeIcon,
+				Variant: button.VariantGhost,
+			}) {
+				@icon.Ellipsis()
+			}
+		}
+		@dropdown.Content() {
+			@dropdown.Group() {
+				@dropdown.Item(dropdown.ItemProps{Href: "#", Target: "_blank"}) {
+					<span class="flex items-center">
+						@icon.Pencil(icon.Props{Size: 16, Class: "mr-2"})
+						Edit
+					</span>
+				}
+				@dropdown.Item(dropdown.ItemProps{Href: "#", Target: "_blank"}) {
+					<span class="flex items-center">
+						@icon.Copy(icon.Props{Size: 16, Class: "mr-2"})
+						Copy
+					</span>
+				}
+				@dropdown.Separator()
+				@dropdown.Item(dropdown.ItemProps{Href: "#", Target: "_blank"}) {
+					<span class="flex items-center text-destructive">
+						@icon.Delete(icon.Props{Size: 16, Class: "mr-2"})
+						Delete
+					</span>
+				}
+			}
+		}
+	}
+}

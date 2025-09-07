@@ -1,25 +1,37 @@
 package views
 
 import (
-	"context"
-	"github.com/a-h/templ"
 	"gorm.io/gorm"
-	"io"
 	"net/http"
+	"strconv"
+	"yourvoice/internal/database/models"
 	"yourvoice/web/templates"
 )
 
-func Parties(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
-	parties := templates.Party()
+func RegisterPartyRoutes(mux *http.ServeMux, db *gorm.DB) {
 
-	if r.Header.Get("AJAX-Target") == "main" {
-		parties.Render(r.Context(), w)
-		return
+	modelManagementProps := ModelManagementProps{
+		Model:         models.Party{},
+		Title:         "Parties",
+		PreloadFields: []string{"Candidates"},
+		Headers:       []string{"Name", "Candidates", "Created At"},
+		MkRow:         mkRow,
 	}
 
-	layout := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		return templates.Layout("Parties").Render(templ.WithChildren(ctx, parties), w)
+	mux.HandleFunc("GET /parties", func(w http.ResponseWriter, r *http.Request) {
+		ModelManagement(w, r, db, modelManagementProps)
 	})
-	templ.Handler(layout).ServeHTTP(w, r)
+}
 
+func mkRow(model any) templates.RowProps {
+	party := model.(models.Party)
+	candidateCount := strconv.Itoa(len(party.Candidates))
+	createdAt := party.CreatedAt.Format("Jan 2, 2006")
+
+	return templates.RowProps{
+		Cells: []string{
+			party.Name,
+			candidateCount,
+			createdAt,
+		}}
 }

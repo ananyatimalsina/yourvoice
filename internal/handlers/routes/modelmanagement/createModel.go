@@ -5,10 +5,9 @@ import (
 	"github.com/ananyatimalsina/schema"
 	"gorm.io/gorm"
 	"net/http"
-	"yourvoice/web/templates/admin/components"
 )
 
-func CreateModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decoder *schema.Decoder, model *T, mkRow func(model any) components.RowProps, actions []templ.Component, options [2]bool) {
+func CreateModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decoder *schema.Decoder, model *T, actions []templ.Component, options [2]bool) {
 	var request T
 	ctx := r.Context()
 
@@ -27,9 +26,4 @@ func CreateModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, dec
 		return
 	}
 
-	row := mkRow(request)
-
-	components.TBody(components.TBodyProps{
-		Rows: []components.RowProps{row},
-	}, [3]bool{options[0], options[1], false}).Render(ctx, w)
 }
