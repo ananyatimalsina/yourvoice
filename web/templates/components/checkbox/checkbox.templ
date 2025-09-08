@@ -7,16 +7,18 @@ import (
 )
 
 type Props struct {
-	ID         string
-	Class      string
-	Attributes templ.Attributes
-	Name       string
-	Value      string
-	Disabled   bool
-	Required   bool
-	Checked    bool
-	Form       string
-	Icon       templ.Component
+	ID                string
+	Class             string
+	Attributes        templ.Attributes
+	Name              string
+	Value             string
+	Disabled          bool
+	Required          bool
+	Checked           bool
+	OnChange          templ.ComponentScript
+	Form              string
+	Icon              templ.Component
+	IndeterminateIcon templ.Component
 }
 
 templ Checkbox(props ...Props) {
@@ -43,6 +45,9 @@ templ Checkbox(props ...Props) {
 			if p.Form != "" {
 				form={ p.Form }
 			}
+			if (templ.ComponentScript{}) != p.OnChange {
+				onChange={ p.OnChange }
+			}
 			role="checkbox"
 			type="checkbox"
 			class={
@@ -51,6 +56,7 @@ templ Checkbox(props ...Props) {
 					"focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring",
 					"disabled:cursor-not-allowed disabled:opacity-50",
 					"checked:bg-primary checked:text-primary-foreground checked:border-primary",
+					"indeterminate:bg-secondary indeterminate:text-secondary-foreground indeterminate:border-secondary",
 					"appearance-none cursor-pointer transition-shadow",
 					"relative",
 					p.Class,
@@ -65,6 +71,15 @@ templ Checkbox(props ...Props) {
 				@p.Icon
 			} else {
 				@icon.Check(icon.Props{Size: 14})
+			}
+		</div>
+		<div
+			class="flex absolute top-0 left-0 justify-center items-center w-4 h-4 opacity-0 pointer-events-none text-primary-foreground peer-indeterminate:opacity-100"
+		>
+			if p.IndeterminateIcon != nil {
+				@p.IndeterminateIcon
+			} else {
+				@icon.Minus(icon.Props{Size: 14})
 			}
 		</div>
 	</div>
