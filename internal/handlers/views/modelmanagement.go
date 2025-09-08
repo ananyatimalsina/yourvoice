@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"yourvoice/internal/utils"
 	"yourvoice/web/templates"
+	"yourvoice/web/templates/modelmanagement"
 
 	"github.com/a-h/templ"
 	"gorm.io/gorm"
@@ -19,7 +20,7 @@ type ModelManagementProps struct {
 	PreloadFields []string
 	Title         string
 	Headers       []string
-	MkRow         func(model any) templates.RowProps
+	MkRow         func(model any) modelmanagement.RowProps
 }
 
 // TODO: Fix JS errors for modal.Model = null && persistant model data on create
@@ -62,13 +63,13 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 	// 	managerModel = props.Model
 	// }
 
-	modelManagerProps := templates.ModelManagerProps{
+	modelManagerProps := modelmanagement.ModelManagerProps{
 		Title:   props.Title,
 		Headers: props.Headers,
 		Rows:    rows,
 	}
 
-	modelPage := templates.ModelManager(modelManagerProps)
+	modelPage := modelmanagement.ModelManager(modelManagerProps)
 
 	if r.Header.Get("AJAX-Target") == "datatable" {
 		templ.Handler(modelPage, templ.WithFragments("datatable")).ServeHTTP(w, r)
@@ -86,15 +87,15 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 	templ.Handler(layout).ServeHTTP(w, r)
 }
 
-func getRows(modelsSlice any, mkRow func(model any) templates.RowProps) []templates.RowProps {
+func getRows(modelsSlice any, mkRow func(model any) modelmanagement.RowProps) []modelmanagement.RowProps {
 	modelsValue := reflect.ValueOf(modelsSlice).Elem()
 
 	if modelsValue.Kind() != reflect.Slice {
-		return []templates.RowProps{}
+		return []modelmanagement.RowProps{}
 	}
 
 	length := modelsValue.Len()
-	rows := make([]templates.RowProps, length)
+	rows := make([]modelmanagement.RowProps, length)
 
 	for i := range length {
 		item := modelsValue.Index(i).Interface()

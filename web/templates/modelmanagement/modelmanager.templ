@@ -1,4 +1,4 @@
-package templates
+package modelmanagement
 
 import (
 	"yourvoice/web/templates/components/table"
@@ -7,8 +7,9 @@ import (
 	"yourvoice/web/templates/components/label"
 	"yourvoice/web/templates/components/button"
 	"yourvoice/web/templates/components/icon"
-	"strings"
 	"yourvoice/web/templates/components/dropdown"
+	"reflect"
+	"strconv"
 )
 
 type ModelManagerProps struct {
@@ -34,24 +35,14 @@ templ ModelManager(props ModelManagerProps) {
 		</div>
 	}
 	@templ.Fragment("datatable") {
-		@table.Table() {
+		@table.Table(table.Props{ID: "datatable"}) {
 			@table.Header() {
 				@table.Row() {
 					for i, header := range props.Headers {
 						if i == 0 {
-							{{ headerID := strings.ReplaceAll(strings.ToLower(header), " ", "_") }}
 							@table.Head() {
 								<div class="flex gap-2 items-center">
-									@checkbox.Checkbox(checkbox.Props{
-										ID:    headerID,
-										Name:  headerID,
-										Value: headerID,
-									})
-									@label.Label(label.Props{
-										For: headerID,
-									}) {
-										{ header }
-									}
+									@modelCheckbox("checkAll", header, templ.JSFuncCall("toggleSelectAll", "this.checked"))
 								</div>
 							}
 						} else {
@@ -61,7 +52,7 @@ templ ModelManager(props ModelManagerProps) {
 						}
 					}
 					@table.Head() {
-						@Dropdown()
+						@modelDropdown(modelDropdownProps{ID: "dropdownTriggerAll", Disabled: true})
 					}
 				}
 			}
@@ -70,20 +61,9 @@ templ ModelManager(props ModelManagerProps) {
 					@table.Row() {
 						for i, cell := range row.Cells {
 							if i == 0 {
-								{{ cellID := strings.ReplaceAll(strings.ToLower(cell), " ", "_") }}
 								@table.Cell() {
-									<div class="flex gap-2 items-center">
-										@checkbox.Checkbox(checkbox.Props{
-											ID:    cellID,
-											Name:  cellID,
-											Value: cellID,
-										})
-										@label.Label(label.Props{
-											For: cellID,
-										}) {
-											{ cell }
-										}
-									</div>
+									{{ ID := "check-" + getModelID(row.Model) }}
+									@modelCheckbox(ID, cell, templ.JSFuncCall("toggleSelectModel", getModelID((row.Model))))
 								}
 							} else {
 								@table.Cell() {
@@ -92,7 +72,7 @@ templ ModelManager(props ModelManagerProps) {
 							}
 						}
 						@table.Cell() {
-							@Dropdown()
+							@modelDropdown()
 						}
 					}
 				}
@@ -101,12 +81,25 @@ templ ModelManager(props ModelManagerProps) {
 	}
 }
 
-templ Dropdown() {
+type modelDropdownProps struct {
+	ID       string
+	Disabled bool
+}
+
+templ modelDropdown(props ...modelDropdownProps) {
+	{{
+		var p modelDropdownProps
+		if len(props) > 0 {
+			p = props[0]
+		}
+	}}
 	@dropdown.Dropdown() {
 		@dropdown.Trigger() {
 			@button.Button(button.Props{
-				Size:    button.SizeIcon,
-				Variant: button.VariantGhost,
+				ID:       p.ID,
+				Size:     button.SizeIcon,
+				Variant:  button.VariantGhost,
+				Disabled: p.Disabled,
 			}) {
 				@icon.Ellipsis()
 			}
@@ -134,5 +127,52 @@ templ Dropdown() {
 				}
 			}
 		}
+	}
+}
+
+templ modelCheckbox(ID string, labelText string, onchange templ.ComponentScript) {
+	<div class="flex gap-2 items-center">
+		@checkbox.Checkbox(checkbox.Props{
+			ID:       ID,
+			Name:     ID,
+			Value:    ID,
+			OnChange: onchange,
+		})
+		@label.Label(label.Props{
+			For: ID,
+		}) {
+			{ labelText }
+		}
+	</div>
+}
+
+func getModelID(model any) string {
+	if model == nil {
+		return ""
+	}
+
+	val := reflect.ValueOf(model)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	if val.Kind() != reflect.Struct {
+		return ""
+	}
+
+	idField := val.FieldByName("ID")
+	if !idField.IsValid() {
+		return ""
+	}
+
+	switch idField.Kind() {
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return strconv.FormatUint(idField.Uint(), 10)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return strconv.FormatInt(idField.Int(), 10)
+	case reflect.String:
+		return idField.String()
+	default:
+		return ""
 	}
 }

@@ -1,11 +1,12 @@
 package views
 
 import (
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 	"yourvoice/internal/database/models"
-	"yourvoice/web/templates"
+	"yourvoice/web/templates/modelmanagement"
+
+	"gorm.io/gorm"
 )
 
 func RegisterPartyRoutes(mux *http.ServeMux, db *gorm.DB) {
@@ -23,12 +24,13 @@ func RegisterPartyRoutes(mux *http.ServeMux, db *gorm.DB) {
 	})
 }
 
-func mkRow(model any) templates.RowProps {
+func mkRow(model any) modelmanagement.RowProps {
 	party := model.(models.Party)
 	candidateCount := strconv.Itoa(len(party.Candidates))
 	createdAt := party.CreatedAt.Format("Jan 2, 2006")
 
-	return templates.RowProps{
+	return modelmanagement.RowProps{
+		Model: party,
 		Cells: []string{
 			party.Name,
 			candidateCount,
