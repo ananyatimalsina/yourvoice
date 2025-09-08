@@ -7,6 +7,7 @@ import (
 	"yourvoice/web/templates/components/icon"
 	"yourvoice/web/templates/components/collapsible"
 	"yourvoice/web/templates/components/label"
+	"yourvoice/web/templates/components/dialog"
 )
 
 templ Layout(Title string) {
@@ -18,11 +19,13 @@ templ Layout(Title string) {
 			<title>{ Title } - YourVoice Admin</title>
 			<link rel="stylesheet" href="/static/output.css"/>
 			<script defer src="/static/ajax.js"></script>
+			<script defer src="/static/modelmanager.js"></script>
 			@sidebar.Script()
 			@dropdown.Script()
 			@popover.Script()
 			@collapsible.Script()
 			@label.Script()
+			@dialog.Script()
 		</head>
 		<body class="h-full">
 			<div class="flex h-full">
