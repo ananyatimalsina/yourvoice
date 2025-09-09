@@ -2,16 +2,13 @@ package database
 
 import (
 	"fmt"
-	"os"
-	"yourvoice/internal/database/models"
-	"yourvoice/internal/utils"
-
-	"github.com/ananyatimalsina/schema"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"os"
+	"yourvoice/internal/database/models"
 )
 
-func LoadDatabase(decoder *schema.Decoder) *gorm.DB {
+func LoadDatabase() *gorm.DB {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s", os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"), os.Getenv("POSTGRES_PORT"), os.Getenv("TZ"))
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
@@ -19,17 +16,12 @@ func LoadDatabase(decoder *schema.Decoder) *gorm.DB {
 		panic("failed to connect to database, " + err.Error())
 	}
 
-	migrateModels(db, decoder)
+	migrateModels(db)
 
 	return db
 }
 
-func migrateModels(db *gorm.DB, decoder *schema.Decoder) {
-	utils.RegisterJSONSlicePtr(decoder, []models.Candidate{})
-	utils.RegisterJSONSlicePtr(decoder, []*models.Candidate{})
-	utils.RegisterJSONSlicePtr(decoder, []models.Vote{})
-	utils.RegisterJSONSlicePtr(decoder, []*models.VoteEvent{})
-	utils.RegisterJSONSlicePtr(decoder, []models.Feedback{})
+func migrateModels(db *gorm.DB) {
 	err := db.AutoMigrate(
 		&models.Party{},
 		&models.Candidate{},

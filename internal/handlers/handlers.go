@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/a-h/templ"
-	"github.com/ananyatimalsina/schema"
 	"gorm.io/gorm"
 	"net/http"
 	"yourvoice/internal/handlers/routes/expression"
@@ -12,7 +11,7 @@ import (
 	"yourvoice/web/templates"
 )
 
-func LoadHanders(router *http.ServeMux, db *gorm.DB, decoder *schema.Decoder) {
+func LoadHanders(router *http.ServeMux, db *gorm.DB) {
 	// Index page
 	//router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 	//	tmpl := template.Must(template.ParseFiles("web/templates/index.html"))

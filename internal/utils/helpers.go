@@ -1,9 +1,7 @@
 package utils
 
 import (
-	"encoding/json"
 	"github.com/a-h/templ"
-	"github.com/ananyatimalsina/schema"
 	"gorm.io/gorm"
 	"reflect"
 	"strconv"
@@ -44,21 +42,6 @@ func GetModelID(model any) uint64 {
 	}
 }
 
-func RegisterJSONSlicePtr[T any](decoder *schema.Decoder, example []T) {
-	decoder.RegisterConverter(example, func(s string) reflect.Value {
-		if s == "" || s == "[]" {
-			return reflect.ValueOf(example)
-		}
-		var v []T
-		err := json.Unmarshal([]byte(s), &v)
-		if err != nil {
-			return reflect.Value{}
-		}
-		return reflect.ValueOf(v)
-	})
-}
-
-// Fix umlauts being a problem
 func BuildRelationshipFieldInputOptions(db *gorm.DB, modelType any) []InputOption {
 	sliceType := reflect.SliceOf(reflect.TypeOf(modelType))
 	modelsSlice := reflect.New(sliceType).Interface()
