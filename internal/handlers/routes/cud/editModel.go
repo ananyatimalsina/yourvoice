@@ -1,33 +1,25 @@
 package cud
 
 import (
-	"github.com/a-h/templ"
-	"github.com/ananyatimalsina/schema"
+	"encoding/json"
 	"gorm.io/gorm"
 	"net/http"
+	"yourvoice/internal/utils"
+	"yourvoice/web/templates/modelmanagement"
 )
 
-func EditModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decoder *schema.Decoder, model *T, actions []templ.Component, options [2]bool) {
+func EditModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, mkRow func(model any) modelmanagement.RowProps, model *T) {
 	var request T
 	ctx := r.Context()
 
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Failed to parse form data: "+err.Error(), http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Failed to parse request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	r.PostForm.Del("CreatedAt")
-	r.PostForm.Del("UpdatedAt")
-	r.PostForm.Del("DeletedAt")
+	id := utils.GetModelID(request)
 
-	if err := decoder.Decode(&request, r.PostForm); err != nil {
-		http.Error(w, "Failed to parse request data: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	id := r.PostForm.Get("ID")
-
-	if id == "" {
+	if id == 0 {
 		http.Error(w, "ID is required for editing a model", http.StatusBadRequest)
 		return
 	}
@@ -36,4 +28,12 @@ func EditModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, decod
 		http.Error(w, "Failed to edit model", http.StatusInternalServerError)
 		return
 	}
+
+	updatedModel, err := gorm.G[T](db).Where("id = ?", id).First(ctx)
+	if err != nil {
+		http.Error(w, "Failed to retrieve updated model", http.StatusInternalServerError)
+		return
+	}
+
+	modelmanagement.ModelRow(mkRow(updatedModel)).Render(ctx, w)
 }
