@@ -9,6 +9,41 @@ import (
 	"strconv"
 )
 
+func GetModelID(model any) uint64 {
+	if model == nil {
+		return 0
+	}
+
+	val := reflect.ValueOf(model)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	if val.Kind() != reflect.Struct {
+		return 0
+	}
+
+	idField := val.FieldByName("ID")
+	if !idField.IsValid() {
+		return 0
+	}
+
+	switch idField.Kind() {
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return idField.Uint()
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return uint64(idField.Int())
+	case reflect.String:
+		u64, err := strconv.ParseUint(idField.String(), 10, 64)
+		if err != nil {
+			return 0
+		}
+		return u64
+	default:
+		return 0
+	}
+}
+
 func RegisterJSONSlicePtr[T any](decoder *schema.Decoder, example []T) {
 	decoder.RegisterConverter(example, func(s string) reflect.Value {
 		if s == "" || s == "[]" {
