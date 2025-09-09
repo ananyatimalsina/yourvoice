@@ -1,4 +1,4 @@
-package modelmanagement
+package cud
 
 import (
 	"github.com/a-h/templ"

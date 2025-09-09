@@ -8,14 +8,16 @@ import (
 	"yourvoice/web/templates/components/button"
 	"yourvoice/web/templates/components/icon"
 	"yourvoice/web/templates/components/dropdown"
+	"yourvoice/web/templates/components/dialog"
 	"reflect"
 	"strconv"
 )
 
 type ModelManagerProps struct {
-	Title   string
-	Headers []string
-	Rows    []RowProps
+	Title      string
+	Headers    []string
+	Rows       []RowProps
+	ModalProps ModalProps
 }
 
 type RowProps struct {
@@ -24,6 +26,7 @@ type RowProps struct {
 }
 
 templ ModelManager(props ModelManagerProps) {
+	@Modal(props.ModalProps)
 	@sidebar.Inset() {
 		<div class="flex flex-col h-full">
 			<div class="flex gap-4 items-center px-6 h-14">
@@ -33,6 +36,13 @@ templ ModelManager(props ModelManagerProps) {
 			@sidebar.Separator()
 			<div class="flex-1 p-6"></div>
 		</div>
+	}
+	@dialog.Trigger(dialog.TriggerProps{
+		For: "modelModal",
+	}) {
+		@button.Button(button.Props{Attributes: templ.Attributes{"onClick": "openModelModal('" + props.ModalProps.Title + "')"}}) {
+			New { props.ModalProps.Title }
+		}
 	}
 	@templ.Fragment("datatable") {
 		@table.Table(table.Props{ID: "datatable"}) {
@@ -58,12 +68,12 @@ templ ModelManager(props ModelManagerProps) {
 			}
 			@table.Header() {
 				for _, row := range props.Rows {
-					@table.Row() {
+					{{ ID := getModelID(row.Model) }}
+					@table.Row(table.RowProps{ID: "row-" + ID}) {
 						for i, cell := range row.Cells {
 							if i == 0 {
 								@table.Cell() {
-									{{ ID := "check-" + getModelID(row.Model) }}
-									@modelCheckbox(ID, cell, templ.JSFuncCall("toggleSelectModel", getModelID((row.Model))))
+									@modelCheckbox("check-"+ID, cell, templ.JSFuncCall("toggleSelectModel", getModelID((row.Model))))
 								}
 							} else {
 								@table.Cell() {
@@ -72,7 +82,10 @@ templ ModelManager(props ModelManagerProps) {
 							}
 						}
 						@table.Cell() {
-							@modelDropdown()
+							@modelDropdown(modelDropdownProps{
+								EditAction:   templ.JSFuncCall("openModelModal", props.ModalProps.Title, row.Model),
+								DeleteAction: "ajax('', {method: 'DELETE', target: 'row-" + ID + "', swap: 'remove'})",
+							})
 						}
 					}
 				}
@@ -82,8 +95,10 @@ templ ModelManager(props ModelManagerProps) {
 }
 
 type modelDropdownProps struct {
-	ID       string
-	Disabled bool
+	ID           string
+	Disabled     bool
+	EditAction   templ.ComponentScript
+	DeleteAction string
 }
 
 templ modelDropdown(props ...modelDropdownProps) {
@@ -106,8 +121,14 @@ templ modelDropdown(props ...modelDropdownProps) {
 		}
 		@dropdown.Content() {
 			@dropdown.Group() {
-				@dropdown.Item(dropdown.ItemProps{Href: "#", Target: "_blank"}) {
-					<span class="flex items-center">
+				@dropdown.Item(dropdown.ItemProps{}) {
+					<span
+						data-tui-dialog-trigger="modelModal"
+						data-dialog-instance="modelModal"
+						data-tui-dialog-trigger-open="false"
+						class="flex items-center group"
+						onClick={ p.EditAction }
+					>
 						@icon.Pencil(icon.Props{Size: 16, Class: "mr-2"})
 						Edit
 					</span>
@@ -119,7 +140,7 @@ templ modelDropdown(props ...modelDropdownProps) {
 					</span>
 				}
 				@dropdown.Separator()
-				@dropdown.Item(dropdown.ItemProps{Href: "#", Target: "_blank"}) {
+				@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"onClick": p.DeleteAction}}) {
 					<span class="flex items-center text-destructive">
 						@icon.Delete(icon.Props{Size: 16, Class: "mr-2"})
 						Delete
