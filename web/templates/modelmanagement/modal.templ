@@ -1,0 +1,66 @@
+package modelmanagement
+
+import (
+	"yourvoice/web/templates/components/dialog"
+	"yourvoice/web/templates/components/form"
+	"yourvoice/web/templates/components/input"
+	"yourvoice/web/templates/components/button"
+)
+
+type ModalProps struct {
+	Title         string
+	FormItemProps []FormItemProps
+}
+
+type FormItemProps struct {
+	ID          string
+	Label       string
+	Placeholder string
+	Type        input.Type
+	Required    bool
+	Description string
+}
+
+templ Modal(props ModalProps) {
+	@dialog.Dialog(dialog.Props{ID: "modelModal"}) {
+		@dialog.Content(
+			dialog.ContentProps{Class: "max-w-md"},
+		) {
+			@dialog.Header() {
+				@dialog.Title(dialog.TitleProps{ID: "modelModalTitle"}) {
+					Manage { props.Title }
+				}
+			}
+			<div class="space-y-4">
+				for _, item := range props.FormItemProps {
+					@form.Item() {
+						@form.Label(form.LabelProps{For: item.ID}) {
+							{ item.Label }
+						}
+						@input.Input(input.Props{
+							ID:          item.ID,
+							Type:        item.Type,
+							Placeholder: item.Placeholder,
+							Required:    item.Required,
+						})
+						@form.Description() {
+							{ item.Description }
+						}
+					}
+				}
+			</div>
+			@dialog.Footer() {
+				@dialog.Close() {
+					@button.Button(button.Props{
+						Variant: button.VariantOutline,
+					}) {
+						Cancel
+					}
+				}
+				@button.Button() {
+					Save changes
+				}
+			}
+		}
+	}
+}

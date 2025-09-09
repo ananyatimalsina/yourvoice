@@ -8,6 +8,7 @@ import (
 	"yourvoice/web/templates/components/collapsible"
 	"yourvoice/web/templates/components/label"
 	"yourvoice/web/templates/components/dialog"
+	"yourvoice/web/templates/components/input"
 )
 
 templ Layout(Title string) {
@@ -26,6 +27,7 @@ templ Layout(Title string) {
 			@collapsible.Script()
 			@label.Script()
 			@dialog.Script()
+			@input.Script()
 		</head>
 		<body class="h-full">
 			<div class="flex h-full">

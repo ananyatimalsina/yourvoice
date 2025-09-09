@@ -21,6 +21,7 @@ type ModelManagementProps struct {
 	Title         string
 	Headers       []string
 	MkRow         func(model any) modelmanagement.RowProps
+	ModalProps    modelmanagement.ModalProps
 }
 
 // TODO: Fix JS errors for modal.Model = null && persistant model data on create
@@ -64,9 +65,10 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 	// }
 
 	modelManagerProps := modelmanagement.ModelManagerProps{
-		Title:   props.Title,
-		Headers: props.Headers,
-		Rows:    rows,
+		Title:      props.Title,
+		Headers:    props.Headers,
+		Rows:       rows,
+		ModalProps: props.ModalProps,
 	}
 
 	modelPage := modelmanagement.ModelManager(modelManagerProps)
