@@ -53,14 +53,19 @@ templ Modal(props ModalProps) {
 				@dialog.Close() {
 					@button.Button(button.Props{
 						Variant: button.VariantOutline,
+						ID:      "modelModalClose",
 					}) {
 						Cancel
 					}
 				}
-				@button.Button() {
+				@button.Button(button.Props{ID: "modelModalSubmit"}) {
 					Save changes
 				}
 			}
 		}
 	}
+}
+
+templ ModelModalScript() {
+	<script defer nonce={ templ.GetNonce(ctx) } src="/static/js/modelmanagement/modelModal.js"></script>
 }

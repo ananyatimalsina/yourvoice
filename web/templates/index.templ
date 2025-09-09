@@ -9,6 +9,7 @@ import (
 	"yourvoice/web/templates/components/label"
 	"yourvoice/web/templates/components/dialog"
 	"yourvoice/web/templates/components/input"
+	"yourvoice/web/templates/modelmanagement"
 )
 
 templ Layout(Title string) {
@@ -20,7 +21,8 @@ templ Layout(Title string) {
 			<title>{ Title } - YourVoice Admin</title>
 			<link rel="stylesheet" href="/static/output.css"/>
 			<script defer src="/static/ajax.js"></script>
-			<script defer src="/static/modelmanager.js"></script>
+			@modelmanagement.ModelmanagerScript()
+			@modelmanagement.ModelModalScript()
 			@sidebar.Script()
 			@dropdown.Script()
 			@popover.Script()
@@ -68,7 +70,7 @@ templ Layout(Title string) {
 												@sidebar.MenuSubItem() {
 													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
 														Attributes: templ.Attributes{
-															"onclick": "ajax('/admin/votes/events', {target: 'main', swap: 'update'})",
+															"onclick": "ajax('/admin/votes/events', {target: 'main', swap: 'update'}, true)",
 														},
 													}) {
 														<span>Events</span>
@@ -77,7 +79,7 @@ templ Layout(Title string) {
 												@sidebar.MenuSubItem() {
 													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
 														Attributes: templ.Attributes{
-															"onclick": "ajax('/admin/votes/parties', {target: 'main', swap: 'update'})",
+															"onclick": "ajax('/admin/votes/parties', {target: 'main', swap: 'update'}, true)",
 														},
 													}) {
 														<span>Parties</span>

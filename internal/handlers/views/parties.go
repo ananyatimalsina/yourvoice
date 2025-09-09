@@ -12,7 +12,6 @@ import (
 )
 
 func RegisterPartyRoutes(mux *http.ServeMux, db *gorm.DB) {
-
 	modelManagementProps := ModelManagementProps{
 		Model:         models.Party{},
 		Title:         "Parties",
@@ -25,8 +24,16 @@ func RegisterPartyRoutes(mux *http.ServeMux, db *gorm.DB) {
 		},
 		}}
 
+	mux.HandleFunc("POST /parties", func(w http.ResponseWriter, r *http.Request) {
+		cud.CreateModel(w, r, db, mkRow, &models.Party{})
+	})
+
 	mux.HandleFunc("GET /parties", func(w http.ResponseWriter, r *http.Request) {
 		ModelManagement(w, r, db, modelManagementProps)
+	})
+
+	mux.HandleFunc("PUT /parties", func(w http.ResponseWriter, r *http.Request) {
+		cud.EditModel(w, r, db, mkRow, &models.Party{})
 	})
 
 	mux.HandleFunc("DELETE /parties", func(w http.ResponseWriter, r *http.Request) {

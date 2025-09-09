@@ -3,19 +3,20 @@ const selectedModels = new Set();
 let checkAll = null;
 let dropdownTriggerAll = null;
 
-let modelModal = null;
-let modelModalTitle = null;
-
-document.addEventListener("DOMContentLoaded", () => {
+function updateSelectedModels() {
 	document
 		.querySelectorAll('input[id^="check-"]:checked')
 		.forEach((el) => selectedModels.add(el.id.replace("check-", "")));
+	fetchElementsModelManager();
+	updateUIState();
+}
+
+document.addEventListener("DOMContentLoaded", updateSelectedModels);
+
+function fetchElementsModelManager() {
 	dropdownTriggerAll = document.getElementById("dropdownTriggerAll");
 	checkAll = document.getElementById("checkAll");
-	modelModal = document.getElementById("modelModal");
-	modelModalTitle = document.getElementById("modelModalTitle");
-	updateUIState();
-});
+}
 
 function updateUIState() {
 	checkAll.checked =
@@ -50,36 +51,4 @@ function toggleSelectModel(modelID) {
 		selectedModels.delete(modelID);
 	}
 	updateUIState();
-}
-
-function openModelModal(title, model = null) {
-	if (model !== null) {
-		modelModalTitle.textContent = `Edit ${title}: ${model.name}`;
-
-		// Add a hidden id input to the modelModal
-		let idInput = modelModal.querySelector("#id");
-		if (!idInput) {
-			idInput = document.createElement("input");
-			idInput.type = "hidden";
-			idInput.id = "id";
-			modelModal.appendChild(idInput);
-		}
-		idInput.value = model.id;
-
-		for (const key in model) {
-			const input = modelModal.querySelector(`#${key}`);
-			if (input) {
-				input.value = model[key];
-			}
-		}
-	} else {
-		modelModalTitle.textContent = `Add ${title}`;
-		modelModal.querySelectorAll("input").forEach((input) => {
-			input.value = "";
-		});
-		const idInput = modelModal.querySelector("#id");
-		if (idInput) {
-			idInput.remove();
-		}
-	}
 }

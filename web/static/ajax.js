@@ -1,11 +1,11 @@
-async function ajax(url, params = {}) {
+async function ajax(url, params = {}, modelManagementRequest = false) {
 	const response = await fetch(url, {
 		method: params.method || "GET",
 		headers: {
 			"AJAX-Request": "true",
 			"AJAX-Target": params.target || "",
 		},
-		body: params.body,
+		body: JSON.stringify(params.body),
 	});
 
 	if (!response.ok) {
@@ -47,4 +47,16 @@ async function ajax(url, params = {}) {
 	if (params.pushState !== false) {
 		history.pushState({}, "", url);
 	}
+
+	if (modelManagementRequest) {
+		selectedModels.clear();
+		updatePageLoad();
+	} else {
+		updateUIState();
+	}
+}
+
+function updatePageLoad() {
+	updateSelectedModels();
+	fetchElementsModelModal();
 }

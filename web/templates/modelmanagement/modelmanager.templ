@@ -9,7 +9,7 @@ import (
 	"yourvoice/web/templates/components/icon"
 	"yourvoice/web/templates/components/dropdown"
 	"yourvoice/web/templates/components/dialog"
-	"reflect"
+	"yourvoice/internal/utils"
 	"strconv"
 )
 
@@ -18,11 +18,6 @@ type ModelManagerProps struct {
 	Headers    []string
 	Rows       []RowProps
 	ModalProps ModalProps
-}
-
-type RowProps struct {
-	Model any
-	Cells []string
 }
 
 templ ModelManager(props ModelManagerProps) {
@@ -44,52 +39,62 @@ templ ModelManager(props ModelManagerProps) {
 			New { props.ModalProps.Title }
 		}
 	}
-	@templ.Fragment("datatable") {
-		@table.Table(table.Props{ID: "datatable"}) {
-			@table.Header() {
-				@table.Row() {
-					for i, header := range props.Headers {
-						if i == 0 {
-							@table.Head() {
-								<div class="flex gap-2 items-center">
-									@modelCheckbox("checkAll", header, templ.JSFuncCall("toggleSelectAll", "this.checked"))
-								</div>
-							}
-						} else {
-							@table.Head() {
-								{ header }
-							}
+	@table.Table(table.Props{ID: "datatable"}) {
+		@table.Header() {
+			@table.Row() {
+				for i, header := range props.Headers {
+					if i == 0 {
+						@table.Head() {
+							<div class="flex gap-2 items-center">
+								@modelCheckbox("checkAll", header, templ.JSFuncCall("toggleSelectAll"))
+							</div>
+						}
+					} else {
+						@table.Head() {
+							{ header }
 						}
 					}
-					@table.Head() {
-						@modelDropdown(modelDropdownProps{ID: "dropdownTriggerAll", Disabled: true})
-					}
+				}
+				@table.Head() {
+					@modelDropdown(modelDropdownProps{ID: "dropdownTriggerAll", Disabled: true})
 				}
 			}
-			@table.Header() {
+		}
+		@templ.Fragment("datatable") {
+			@table.Body(table.BodyProps{ID: "datatable"}) {
 				for _, row := range props.Rows {
-					{{ ID := getModelID(row.Model) }}
-					@table.Row(table.RowProps{ID: "row-" + ID}) {
-						for i, cell := range row.Cells {
-							if i == 0 {
-								@table.Cell() {
-									@modelCheckbox("check-"+ID, cell, templ.JSFuncCall("toggleSelectModel", getModelID((row.Model))))
-								}
-							} else {
-								@table.Cell() {
-									{ cell }
-								}
-							}
-						}
-						@table.Cell() {
-							@modelDropdown(modelDropdownProps{
-								EditAction:   templ.JSFuncCall("openModelModal", props.ModalProps.Title, row.Model),
-								DeleteAction: "ajax('', {method: 'DELETE', target: 'row-" + ID + "', swap: 'remove'})",
-							})
-						}
-					}
+					@ModelRow(row)
 				}
 			}
+		}
+	}
+}
+
+type RowProps struct {
+	Model      any
+	Cells      []string
+	ModalTitle string
+}
+
+templ ModelRow(props RowProps) {
+	{{ ID := utils.GetModelID(props.Model) }}
+	@table.Row(table.RowProps{ID: "row-" + strconv.FormatUint(ID, 10)}) {
+		for i, cell := range props.Cells {
+			if i == 0 {
+				@table.Cell() {
+					@modelCheckbox("check-"+strconv.FormatUint(ID, 10), cell, templ.JSFuncCall("toggleSelectModel", strconv.FormatUint(ID, 10)))
+				}
+			} else {
+				@table.Cell() {
+					{ cell }
+				}
+			}
+		}
+		@table.Cell() {
+			@modelDropdown(modelDropdownProps{
+				EditAction:   templ.JSFuncCall("openModelModal", props.ModalTitle, props.Model),
+				DeleteAction: "ajax('', {method: 'DELETE', target: 'row-" + strconv.FormatUint(ID, 10) + "', swap: 'remove'})",
+			})
 		}
 	}
 }
@@ -167,33 +172,6 @@ templ modelCheckbox(ID string, labelText string, onchange templ.ComponentScript)
 	</div>
 }
 
-func getModelID(model any) string {
-	if model == nil {
-		return ""
-	}
-
-	val := reflect.ValueOf(model)
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-
-	if val.Kind() != reflect.Struct {
-		return ""
-	}
-
-	idField := val.FieldByName("ID")
-	if !idField.IsValid() {
-		return ""
-	}
-
-	switch idField.Kind() {
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return strconv.FormatUint(idField.Uint(), 10)
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return strconv.FormatInt(idField.Int(), 10)
-	case reflect.String:
-		return idField.String()
-	default:
-		return ""
-	}
+templ ModelmanagerScript() {
+	<script defer nonce={ templ.GetNonce(ctx) } src="/static/js/modelmanagement/modelmanager.js"></script>
 }
