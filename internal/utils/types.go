@@ -10,8 +10,8 @@ import (
 )
 
 type Expression struct {
-	ID   uint   `json:"ID" schema:"ID" gorm:"primaryKey"`
-	Data string `json:"data" schema:"data,required" gorm:"not null"`
+	ID   uint   `json:"ID" gorm:"primaryKey"`
+	Data string `json:"data" validate:"required" gorm:"not null"`
 }
 
 type RSAPrivateKey struct {
@@ -41,10 +41,10 @@ func (r *RSAPrivateKey) Scan(value any) error {
 
 type Event struct {
 	gorm.Model
-	Name       string        `json:"name" schema:"name,required" gorm:"not null"`
-	StartDate  time.Time     `json:"start_date" schema:"start_date,required" gorm:"not null"`
-	EndDate    time.Time     `json:"end_date" schema:"end_date,required" gorm:"not null"`
-	PrivateKey RSAPrivateKey `json:"private_key" gorm:"not null"`
+	Name       string        `json:"name" validate:"required" gorm:"not null"`
+	StartDate  time.Time     `json:"start_date" validate:"required,datetime" gorm:"not null"`
+	EndDate    time.Time     `json:"end_date" validate:"required,datetime" gorm:"not null"`
+	PrivateKey RSAPrivateKey `json:"private_key" validate:"required" gorm:"not null"`
 }
 
 // templ
