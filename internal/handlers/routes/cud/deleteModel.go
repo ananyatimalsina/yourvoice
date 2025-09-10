@@ -27,7 +27,11 @@ func DeleteModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, mod
 		return
 	}
 
-	db.Delete(model, ids)
+	result := db.Delete(model, ids)
+	if result.Error != nil {
+		http.Error(w, "Failed to delete model(s): "+result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Model deleted successfully"))
