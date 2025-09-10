@@ -17,6 +17,17 @@ func EditModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, mkRow
 		return
 	}
 
+	validationErrors, err := ValidateStruct(request)
+	if err != nil {
+		http.Error(w, "Failed to marshal validation errors: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if validationErrors != "" {
+		http.Error(w, validationErrors, http.StatusBadRequest)
+		return
+	}
+
 	id := utils.GetModelID(request)
 
 	if id == 0 {

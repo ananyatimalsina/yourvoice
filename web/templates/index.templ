@@ -70,7 +70,7 @@ templ Layout(Title string) {
 												@sidebar.MenuSubItem() {
 													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
 														Attributes: templ.Attributes{
-															"onclick": "ajax('/admin/votes/events', {target: 'main', swap: 'update'}, true)",
+															"onclick": "ajax('/admin/votes/events', {target: 'main', swap: 'update', modelManagementRequest: true})",
 														},
 													}) {
 														<span>Events</span>
@@ -79,7 +79,7 @@ templ Layout(Title string) {
 												@sidebar.MenuSubItem() {
 													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
 														Attributes: templ.Attributes{
-															"onclick": "ajax('/admin/votes/parties', {target: 'main', swap: 'update'}, true)",
+															"onclick": "ajax('/admin/votes/parties', {target: 'main', swap: 'update', modelManagementRequest: true})",
 														},
 													}) {
 														<span>Parties</span>

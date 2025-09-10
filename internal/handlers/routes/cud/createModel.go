@@ -16,6 +16,17 @@ func CreateModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, mkR
 		return
 	}
 
+	validationErrors, err := ValidateStruct(request)
+	if err != nil {
+		http.Error(w, "Failed to marshal validation errors: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if validationErrors != "" {
+		http.Error(w, validationErrors, http.StatusBadRequest)
+		return
+	}
+
 	if err := gorm.G[T](db).Create(ctx, &request); err != nil {
 		http.Error(w, "Failed to create model", http.StatusInternalServerError)
 		return

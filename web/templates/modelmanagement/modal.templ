@@ -19,6 +19,7 @@ type FormItemProps struct {
 	Type        input.Type
 	Required    bool
 	Description string
+	Message     string
 }
 
 templ Modal(props ModalProps) {
@@ -45,6 +46,12 @@ templ Modal(props ModalProps) {
 						})
 						@form.Description() {
 							{ item.Description }
+						}
+						@form.Message(form.MessageProps{
+							ID:      "message-" + item.ID,
+							Variant: form.MessageVariantError,
+						}) {
+							{ item.Message }
 						}
 					}
 				}
