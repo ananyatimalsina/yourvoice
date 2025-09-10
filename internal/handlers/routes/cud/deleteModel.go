@@ -2,25 +2,36 @@ package cud
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"gorm.io/gorm"
 )
 
-// This might be prone to SQL injectio, due to the string IDs being passed directly to GORM.
 func DeleteModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, model *T) {
-	ids := []string{}
+	ids := []uint64{}
 
 	if r.Header.Get("AJAX-Targets") != "" {
 		targets := strings.SplitSeq(r.Header.Get("AJAX-Targets"), ",")
 		for t := range targets {
 			id := strings.TrimPrefix(t, "row-")
-			ids = append(ids, id)
+			parseUint, err := strconv.ParseUint(id, 10, 64)
+			if err != nil {
+				http.Error(w, "Invalid ID format: "+id, http.StatusBadRequest)
+				return
+			}
+			ids = append(ids, parseUint)
 		}
 	}
 
 	if r.Header.Get("AJAX-Target") != "" {
-		ids = append(ids, strings.TrimPrefix(r.Header.Get("AJAX-Target"), "row-"))
+		id := strings.TrimPrefix(r.Header.Get("AJAX-Target"), "row-")
+		parseUint, err := strconv.ParseUint(id, 10, 64)
+		if err != nil {
+			http.Error(w, "Invalid ID format: "+id, http.StatusBadRequest)
+			return
+		}
+		ids = append(ids, parseUint)
 	}
 
 	if len(ids) == 0 {
