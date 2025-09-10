@@ -41,10 +41,10 @@ func (r *RSAPrivateKey) Scan(value any) error {
 
 type Event struct {
 	gorm.Model
-	Name       string        `json:"name" validate:"required" gorm:"not null"`
+	Name       string        `json:"name" validate:"required" gorm:"not null;unique"`
 	StartDate  time.Time     `json:"start_date" validate:"required,datetime" gorm:"not null"`
 	EndDate    time.Time     `json:"end_date" validate:"required,datetime" gorm:"not null"`
-	PrivateKey RSAPrivateKey `json:"private_key" validate:"required" gorm:"not null"`
+	PrivateKey RSAPrivateKey `json:"private_key" validate:"required" gorm:"not null;unique"`
 }
 
 // templ
