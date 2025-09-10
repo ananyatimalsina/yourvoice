@@ -3,6 +3,7 @@ async function ajax(url, params = {}) {
 		method: params.method || "GET",
 		headers: {
 			"AJAX-Target": params.target || "",
+			"AJAX-Targets": params.targets || "",
 		},
 		body: JSON.stringify(params.body),
 	});
