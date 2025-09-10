@@ -10,10 +10,19 @@ async function ajax(url, params = {}) {
 
 	if (!response.ok) {
 		const text = await response.text();
-		const json = JSON.parse(text);
+		let json = null;
+		try {
+			json = JSON.parse(text);
+		} catch (e) {
+			throw {
+				status: response.status,
+				message: text,
+			};
+		}
+
 		throw {
 			status: response.status,
-			message: json.error ? text : json,
+			message: json,
 		};
 	}
 
@@ -76,11 +85,20 @@ async function ajax(url, params = {}) {
 		history.pushState({}, "", url);
 	}
 
-	if (params.modelManagementRequest === true) {
-		selectedModels.clear();
-		updatePageLoad();
-	} else {
+	if (params.swap == "remove") {
+		if (params.targets) {
+			selectedModels.clear();
+		} else {
+			selectedModels.delete(params.target.slice(4));
+		}
 		updateUIState();
+	} else {
+		if (params.modelManagementRequest === true) {
+			selectedModels.clear();
+			updatePageLoad();
+		} else {
+			updateUIState();
+		}
 	}
 }
 

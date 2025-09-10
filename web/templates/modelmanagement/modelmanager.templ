@@ -39,7 +39,7 @@ templ ModelManager(props ModelManagerProps) {
 			New { props.ModalProps.Title }
 		}
 	}
-	@table.Table(table.Props{ID: "datatable"}) {
+	@table.Table() {
 		@table.Header() {
 			@table.Row() {
 				for i, header := range props.Headers {
@@ -56,7 +56,7 @@ templ ModelManager(props ModelManagerProps) {
 					}
 				}
 				@table.Head() {
-					@modelDropdown(modelDropdownProps{ID: "dropdownTriggerAll", Disabled: true, DeleteAction: "ajax('', {method: 'DELETE', targets: [...selectedModels].map(id => 'row-' + id), swap: 'remove', modelManagementRequest: true})"})
+					@modelDropdown(modelDropdownProps{ID: "dropdownTriggerAll", Disabled: true, DeleteAction: "ajax('', {method: 'DELETE', targets: [...selectedModels].map(id => 'row-' + id), swap: 'remove')"})
 				}
 			}
 		}
@@ -106,20 +106,14 @@ type modelDropdownProps struct {
 	DeleteAction string
 }
 
-templ modelDropdown(props ...modelDropdownProps) {
-	{{
-		var p modelDropdownProps
-		if len(props) > 0 {
-			p = props[0]
-		}
-	}}
+templ modelDropdown(props modelDropdownProps) {
 	@dropdown.Dropdown() {
 		@dropdown.Trigger() {
 			@button.Button(button.Props{
-				ID:       p.ID,
+				ID:       props.ID,
 				Size:     button.SizeIcon,
 				Variant:  button.VariantGhost,
-				Disabled: p.Disabled,
+				Disabled: props.Disabled,
 			}) {
 				@icon.Ellipsis()
 			}
@@ -132,7 +126,7 @@ templ modelDropdown(props ...modelDropdownProps) {
 						data-dialog-instance="modelModal"
 						data-tui-dialog-trigger-open="false"
 						class="flex items-center group"
-						onClick={ p.EditAction }
+						onClick={ props.EditAction }
 					>
 						@icon.Pencil(icon.Props{Size: 16, Class: "mr-2"})
 						Edit
@@ -145,7 +139,7 @@ templ modelDropdown(props ...modelDropdownProps) {
 					</span>
 				}
 				@dropdown.Separator()
-				@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"onClick": p.DeleteAction}}) {
+				@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"onClick": props.DeleteAction}}) {
 					<span class="flex items-center text-destructive">
 						@icon.Delete(icon.Props{Size: 16, Class: "mr-2"})
 						Delete
