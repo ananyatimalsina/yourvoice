@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// This might be prone to SQL injectio, due to the string IDs being passed directly to GORM.
 func DeleteModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, model *T) {
 	ids := []string{}
 

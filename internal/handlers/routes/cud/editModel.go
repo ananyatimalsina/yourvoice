@@ -36,6 +36,17 @@ func EditModel[T any](w http.ResponseWriter, r *http.Request, db *gorm.DB, mkRow
 	}
 
 	if _, err := gorm.G[T](db).Where("id = ?", id).Updates(ctx, request); err != nil {
+		gormErrors, err := ValidateGorm(request, err)
+		if err != nil {
+			http.Error(w, "Failed to marshal gorm errors: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if gormErrors != "" {
+			http.Error(w, gormErrors, http.StatusBadRequest)
+			return
+		}
+
 		http.Error(w, "Failed to edit model", http.StatusInternalServerError)
 		return
 	}
