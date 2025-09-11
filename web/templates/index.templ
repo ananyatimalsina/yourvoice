@@ -12,6 +12,7 @@ import (
 	"yourvoice/web/templates/modelmanagement"
 )
 
+// TODO div main is missing styling for padding on mobile sidebar
 templ Layout(Title string) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full">
@@ -23,6 +24,7 @@ templ Layout(Title string) {
 			<script defer src="/static/ajax.js"></script>
 			@modelmanagement.ModelmanagerScript()
 			@modelmanagement.ModelModalScript()
+			@modelmanagement.ModelFilterBarScript()
 			@sidebar.Script()
 			@dropdown.Script()
 			@popover.Script()

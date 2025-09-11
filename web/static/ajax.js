@@ -105,4 +105,5 @@ async function ajax(url, params = {}) {
 function updatePageLoad() {
 	updateSelectedModels();
 	fetchElementsModelModal();
+	fetchElementsFilterBar();
 }

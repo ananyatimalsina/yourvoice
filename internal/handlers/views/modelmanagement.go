@@ -18,6 +18,7 @@ type ModelManagementProps struct {
 	Model         any
 	SafeModel     any
 	PreloadFields []string
+	SearchFields  []string
 	Title         string
 	Headers       []string
 	MkRow         func(model any) modelmanagement.RowProps
@@ -26,11 +27,11 @@ type ModelManagementProps struct {
 
 // TODO: Fix JS errors for modal.Model = null && persistant model data on create
 func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props ModelManagementProps) {
+	ctx := r.Context()
 	sliceType := reflect.SliceOf(reflect.TypeOf(props.Model))
 	modelsSlice := reflect.New(sliceType).Interface()
 
-	// Get search value from query parameter
-	//searchValue := r.URL.Query().Get("search")
+	searchValue := r.URL.Query().Get("search")
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil || page <= 0 {
 		page = 1
@@ -46,6 +47,10 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 	// Fetch parties from database with search filter
 	for _, field := range props.PreloadFields {
 		db = db.Preload(field)
+	}
+
+	for _, field := range props.SearchFields {
+		db = db.Or(field+" ILIKE ?", "%"+searchValue+"%")
 	}
 
 	db = db.Offset((size * (page - 1))).Limit(size)
@@ -74,12 +79,12 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 	modelPage := modelmanagement.ModelManager(modelManagerProps)
 
 	if r.Header.Get("AJAX-Target") == "datatable" {
-		templ.Handler(modelPage, templ.WithFragments("datatable")).ServeHTTP(w, r)
+		templ.RenderFragments(ctx, w, modelPage, "datatable")
 		return
 	}
 
 	if r.Header.Get("AJAX-Target") == "main" {
-		templ.Handler(modelPage).ServeHTTP(w, r)
+		modelPage.Render(ctx, w)
 		return
 	}
 

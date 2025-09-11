@@ -1,0 +1,35 @@
+package modelmanagement
+
+import (
+	"yourvoice/web/templates/components/button"
+	"yourvoice/web/templates/components/dialog"
+	"yourvoice/web/templates/components/input"
+)
+
+type FilterBarProps struct {
+	Title         string
+	SingularTitle string
+}
+
+templ FilterBar(props FilterBarProps) {
+	<div id="modelBar" class="flex gap-4 items-center pr-2 pb-2" method="GET" action="">
+		@input.Input(input.Props{
+			ID:          "search",
+			Name:        "search",
+			Type:        input.TypeSearch,
+			Placeholder: "Search " + props.Title + "...",
+			Class:       "max-w-xs w-full",
+		})
+		@dialog.Trigger(dialog.TriggerProps{
+			For: "modelModal",
+		}) {
+			@button.Button(button.Props{Attributes: templ.Attributes{"onClick": "openModelModal('" + props.SingularTitle + "')"}}) {
+				New { props.SingularTitle }
+			}
+		}
+	</div>
+}
+
+templ ModelFilterBarScript() {
+	<script defer nonce={ templ.GetNonce(ctx) } src="/static/js/modelmanagement/filterbar.js"></script>
+}

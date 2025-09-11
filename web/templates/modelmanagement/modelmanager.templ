@@ -8,7 +8,6 @@ import (
 	"yourvoice/web/templates/components/button"
 	"yourvoice/web/templates/components/icon"
 	"yourvoice/web/templates/components/dropdown"
-	"yourvoice/web/templates/components/dialog"
 	"yourvoice/internal/utils"
 	"strconv"
 )
@@ -29,16 +28,10 @@ templ ModelManager(props ModelManagerProps) {
 				<span id>{ props.Title }</span>
 			</div>
 			@sidebar.Separator()
-			<div class="flex-1 p-6"></div>
+			<div class="flex-1 p-3"></div>
 		</div>
 	}
-	@dialog.Trigger(dialog.TriggerProps{
-		For: "modelModal",
-	}) {
-		@button.Button(button.Props{Attributes: templ.Attributes{"onClick": "openModelModal('" + props.ModalProps.Title + "')"}}) {
-			New { props.ModalProps.Title }
-		}
-	}
+	@FilterBar(FilterBarProps{Title: props.Title, SingularTitle: props.ModalProps.Title})
 	@table.Table() {
 		@table.Header() {
 			@table.Row() {

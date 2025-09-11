@@ -15,6 +15,7 @@ func RegisterPartyRoutes(mux *http.ServeMux, db *gorm.DB) {
 		Model:         models.Party{},
 		Title:         "Parties",
 		PreloadFields: []string{"Candidates"},
+		SearchFields:  []string{"name"},
 		Headers:       []string{"Name", "Candidates", "Created At"},
 		MkRow:         mkRow,
 		ModalProps: modelmanagement.ModalProps{Title: "Party", FormItemProps: []modelmanagement.FormItemProps{
