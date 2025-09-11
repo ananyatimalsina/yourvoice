@@ -31,6 +31,7 @@ templ ModelManager(props ModelManagerProps) {
 			<div class="flex-1 p-3"></div>
 		</div>
 	}
+	@FilterBar(FilterBarProps{Title: props.Title, SingularTitle: props.ModalProps.Title, Columns: props.Headers[1:]})
 	@table.Table() {
 		@table.Header() {
 			@table.Row() {

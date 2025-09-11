@@ -1,10 +1,12 @@
 let modelBar = null;
 let searchInput = null;
+let table = null;
 
 function fetchElementsFilterBar() {
 	modelBar = document.getElementById("modelBar");
 	searchInput = document.getElementById("search");
 	searchInput.addEventListener("input", debounce(performSearch, 400));
+	table = document.getElementById("datatable").parentElement;
 }
 
 document.addEventListener("DOMContentLoaded", fetchElementsFilterBar);
@@ -28,4 +30,17 @@ function performSearch() {
 		}
 	});
 	ajax("?" + params, { target: "datatable", swap: "update" });
+}
+
+function toggleVisibility(element, colIndex) {
+	const isHidden = table.rows[0]?.cells[colIndex]?.style.display === "none";
+	for (var row of table.rows) {
+		if (row.cells.length > colIndex) {
+			row.cells[colIndex].style.display = isHidden ? "" : "none";
+		}
+	}
+	element.firstElementChild.firstElementChild.setAttribute(
+		"visibility",
+		isHidden ? "visible" : "hidden",
+	);
 }
