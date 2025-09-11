@@ -6,7 +6,7 @@ let dropdownTriggerAll = null;
 function updateSelectedModels() {
 	document
 		.querySelectorAll('input[id^="check-"]:checked')
-		.forEach((el) => selectedModels.add(el.id.replace("check-", "")));
+		.forEach((el) => selectedModels.add(el.id.replace("check-", "row-")));
 	fetchElementsModelManager();
 	updateUIState();
 }
@@ -24,7 +24,7 @@ function updateUIState() {
 		document.querySelectorAll('input[id^="check-"]').length;
 	checkAll.indeterminate = selectedModels.size > 0 && !checkAll.checked;
 
-	dropdownTriggerAll.disabled = selectedModels.size === 0;
+	dropdownTriggerAll.disabled = selectedModels.size < 2;
 }
 
 function toggleSelectAll() {
@@ -33,12 +33,12 @@ function toggleSelectAll() {
 			.querySelectorAll('input[id^="check-"]:not(:checked)')
 			.forEach((el) => {
 				el.checked = true;
-				selectedModels.add(el.id.replace("check-", ""));
+				selectedModels.add(el.id.replace("check-", "row-"));
 			});
 	} else {
 		document.querySelectorAll('input[id^="check-"]:checked').forEach((el) => {
 			el.checked = false;
-			selectedModels.delete(el.id.replace("check-", ""));
+			selectedModels.delete(el.id.replace("check-", "row-"));
 		});
 	}
 	updateUIState();
@@ -46,9 +46,9 @@ function toggleSelectAll() {
 
 function toggleSelectModel(modelID) {
 	if (document.getElementById("check-" + modelID).checked) {
-		selectedModels.add(modelID);
+		selectedModels.add("row-" + modelID);
 	} else {
-		selectedModels.delete(modelID);
+		selectedModels.delete("row-" + modelID);
 	}
 	updateUIState();
 }

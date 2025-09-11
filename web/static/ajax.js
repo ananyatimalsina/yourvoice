@@ -85,11 +85,11 @@ async function ajax(url, params = {}) {
 		history.pushState({}, "", url);
 	}
 
-	if (params.swap == "remove") {
+	if (params.method == "DELETE" || params.method == "PUT") {
 		if (params.targets) {
-			selectedModels.clear();
+			params.targets.forEach((t) => selectedModels.delete(t));
 		} else {
-			selectedModels.delete(params.target.slice(4));
+			selectedModels.delete(params.target);
 		}
 		updateUIState();
 	} else {

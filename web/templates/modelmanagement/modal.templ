@@ -5,6 +5,7 @@ import (
 	"yourvoice/web/templates/components/form"
 	"yourvoice/web/templates/components/input"
 	"yourvoice/web/templates/components/button"
+	"strconv"
 )
 
 type ModalProps struct {
@@ -18,6 +19,7 @@ type FormItemProps struct {
 	Placeholder string
 	Type        input.Type
 	Required    bool
+	Unique      bool
 	Description string
 	Message     string
 }
@@ -43,6 +45,7 @@ templ Modal(props ModalProps) {
 							Type:        item.Type,
 							Placeholder: item.Placeholder,
 							Required:    item.Required,
+							Attributes:  templ.Attributes{"unique": strconv.FormatBool(item.Unique)},
 						})
 						@form.Description() {
 							{ item.Description }

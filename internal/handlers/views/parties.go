@@ -19,8 +19,8 @@ func RegisterPartyRoutes(mux *http.ServeMux, db *gorm.DB) {
 		Headers:       []string{"Name", "Candidates", "Created At"},
 		MkRow:         mkRow,
 		ModalProps: modelmanagement.ModalProps{Title: "Party", FormItemProps: []modelmanagement.FormItemProps{
-			{ID: "name", Label: "Name", Placeholder: "Democratic Party", Type: input.TypeText, Required: true, Description: "The name of the party."},
-			{ID: "platform", Label: "Platform", Placeholder: "https://democrats.org/where-we-stand/party-platform/", Type: input.TypeURL, Required: true, Description: "Link to the platform of the party."},
+			{ID: "name", Label: "Name", Placeholder: "Democratic Party", Type: input.TypeText, Required: true, Unique: true, Description: "The name of the party."},
+			{ID: "platform", Label: "Platform", Placeholder: "https://democrats.org/where-we-stand/party-platform/", Type: input.TypeURL, Required: true, Unique: false, Description: "Link to the platform of the party."},
 		},
 		}}
 

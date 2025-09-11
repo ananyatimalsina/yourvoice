@@ -56,7 +56,7 @@ templ ModelManager(props ModelManagerProps) {
 					}
 				}
 				@table.Head() {
-					@modelDropdown(modelDropdownProps{ID: "dropdownTriggerAll", Disabled: true, DeleteAction: "ajax('', {method: 'DELETE', targets: [...selectedModels].map(id => 'row-' + id), swap: 'remove')"})
+					@modelDropdown(modelDropdownProps{ID: "dropdownTriggerAll", Disabled: true, EditAction: templ.JSFuncCall("openModelModal", props.Title, nil, true), DeleteAction: "ajax('', {method: 'DELETE', targets: Array.from(selectedModels), swap: 'remove'})"})
 				}
 			}
 		}

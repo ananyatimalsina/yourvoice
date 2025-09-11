@@ -16,38 +16,43 @@ document.addEventListener("DOMContentLoaded", fetchElementsModelModal);
 
 const ID_FIELD = "ID";
 
-function openModelModal(title, model = null) {
-	const modelModalInputs = Array.from(modelModal.querySelectorAll("input"));
+function openModelModal(title, model = null, selected = false) {
+	if (selected) {
+		modelModalInputs = modelModal.querySelectorAll("input[unique='false']");
+	} else {
+		modelModalInputs = modelModal.querySelectorAll("input");
+	}
+
+	modelModalInputsUnique = modelModal.querySelectorAll("input[unique='true']");
+
 	const messages = [];
+
+	function handleUnique() {
+		modelModalInputsUnique.forEach((input) => {
+			if (input.parentElement.parentElement) {
+				input.parentElement.parentElement.hidden = selected;
+			}
+		});
+	}
 
 	function resetForm() {
 		modelModalInputs.forEach((input) => {
 			input.value = "";
 			messages.push("message-" + input.id);
 		});
-		const idInput = modelModal.querySelector(`#${ID_FIELD}`);
-		if (idInput) idInput.remove();
-		modelModalTitle.textContent = `Add ${title}`;
+		if (selected) {
+			modelModalTitle.textContent = `Edit ${title}`;
+		} else modelModalTitle.textContent = `Add ${title}`;
 	}
 
 	function populateForm(model) {
 		for (const key in model) {
-			if (key === ID_FIELD) continue;
 			const input = modelModal.querySelector(`#${key}`);
 			if (input) {
 				input.value = model[key];
 				messages.push("message-" + key);
 			}
 		}
-		let idInput = modelModal.querySelector(`#${ID_FIELD}`);
-		if (!idInput) {
-			idInput = document.createElement("input");
-			idInput.type = "hidden";
-			idInput.id = ID_FIELD;
-			modelModal.appendChild(idInput);
-			modelModalInputs.push(idInput);
-		}
-		idInput.value = model[ID_FIELD];
 		modelModalTitle.textContent = `Edit ${title}: ${model.name}`;
 	}
 
@@ -71,6 +76,8 @@ function openModelModal(title, model = null) {
 		}
 	}
 
+	handleUnique();
+
 	if (model) {
 		populateForm(model);
 		var method = "PUT",
@@ -78,9 +85,15 @@ function openModelModal(title, model = null) {
 			swap = "update";
 	} else {
 		resetForm();
-		var method = "POST",
-			target = "datatable",
-			swap = "append";
+		if (selected) {
+			var method = "PUT",
+				targets = Array.from(selectedModels),
+				swap = "update";
+		} else {
+			var method = "POST",
+				target = "datatable",
+				swap = "append";
+		}
 	}
 
 	clearMessages();
@@ -91,13 +104,13 @@ function openModelModal(title, model = null) {
 		const body = {};
 		modelModalInputs.forEach((input) => {
 			if (input.id) {
-				body[input.id] =
-					input.id === ID_FIELD ? parseInt(input.value, 10) : input.value;
+				body[input.id] = input.value;
 			}
 		});
 		ajax("", {
 			method: method,
 			target: target,
+			targets: targets,
 			body: body,
 			swap: swap,
 		})
