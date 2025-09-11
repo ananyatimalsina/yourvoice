@@ -15,7 +15,6 @@ type Props struct {
 	Disabled          bool
 	Required          bool
 	Checked           bool
-	OnChange          templ.ComponentScript
 	Form              string
 	Icon              templ.Component
 	IndeterminateIcon templ.Component
@@ -44,9 +43,6 @@ templ Checkbox(props ...Props) {
 			}
 			if p.Form != "" {
 				form={ p.Form }
-			}
-			if (templ.ComponentScript{}) != p.OnChange {
-				onChange={ p.OnChange }
 			}
 			role="checkbox"
 			type="checkbox"

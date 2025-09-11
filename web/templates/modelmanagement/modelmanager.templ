@@ -31,7 +31,6 @@ templ ModelManager(props ModelManagerProps) {
 			<div class="flex-1 p-3"></div>
 		</div>
 	}
-	@FilterBar(FilterBarProps{Title: props.Title, SingularTitle: props.ModalProps.Title})
 	@table.Table() {
 		@table.Header() {
 			@table.Row() {
@@ -39,7 +38,7 @@ templ ModelManager(props ModelManagerProps) {
 					if i == 0 {
 						@table.Head() {
 							<div class="flex gap-2 items-center">
-								@modelCheckbox("checkAll", header, templ.JSFuncCall("toggleSelectAll"))
+								@modelCheckbox("checkAll", header, "toggleSelectAll()")
 							</div>
 						}
 					} else {
@@ -75,7 +74,7 @@ templ ModelRow(props RowProps) {
 		for i, cell := range props.Cells {
 			if i == 0 {
 				@table.Cell() {
-					@modelCheckbox("check-"+strconv.FormatUint(ID, 10), cell, templ.JSFuncCall("toggleSelectModel", strconv.FormatUint(ID, 10)))
+					@modelCheckbox("check-"+strconv.FormatUint(ID, 10), cell, "toggleSelectModel(this)")
 				}
 			} else {
 				@table.Cell() {
@@ -113,7 +112,7 @@ templ modelDropdown(props modelDropdownProps) {
 		}
 		@dropdown.Content() {
 			@dropdown.Group() {
-				@dropdown.Item(dropdown.ItemProps{}) {
+				@dropdown.Item() {
 					<span
 						data-tui-dialog-trigger="modelModal"
 						data-dialog-instance="modelModal"
@@ -143,13 +142,15 @@ templ modelDropdown(props modelDropdownProps) {
 	}
 }
 
-templ modelCheckbox(ID string, labelText string, onchange templ.ComponentScript) {
+templ modelCheckbox(ID string, labelText string, onchange string) {
 	<div class="flex gap-2 items-center">
 		@checkbox.Checkbox(checkbox.Props{
-			ID:       ID,
-			Name:     ID,
-			Value:    ID,
-			OnChange: onchange,
+			ID:    ID,
+			Name:  ID,
+			Value: ID,
+			Attributes: templ.Attributes{
+				"onchange": onchange,
+			},
 		})
 		@label.Label(label.Props{
 			For: ID,

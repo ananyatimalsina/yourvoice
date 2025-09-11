@@ -44,11 +44,11 @@ function toggleSelectAll() {
 	updateUIState();
 }
 
-function toggleSelectModel(modelID) {
-	if (document.getElementById("check-" + modelID).checked) {
-		selectedModels.add("row-" + modelID);
+function toggleSelectModel(element) {
+	if (element.checked) {
+		selectedModels.add(element.id.replace("check-", "row-"));
 	} else {
-		selectedModels.delete("row-" + modelID);
+		selectedModels.delete(element.id.replace("check-", "row-"));
 	}
 	updateUIState();
 }
