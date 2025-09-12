@@ -55,7 +55,7 @@ func GetJSONTag(obj any, fieldName string) string {
 			return tag
 		}
 	}
-	return fieldName // fallback to struct field name
+	return ""
 }
 
 func BuildRelationshipFieldInputOptions(db *gorm.DB, modelType any) []InputOption {

@@ -12,6 +12,7 @@ import (
 type FilterBarProps struct {
 	Title         string
 	SingularTitle string
+	SearchQuery   string
 	Columns       []string
 	Actions       []templ.Component
 }
@@ -23,7 +24,9 @@ templ FilterBar(props FilterBarProps) {
 			Name:        "search",
 			Type:        input.TypeSearch,
 			Placeholder: "Search " + props.Title + "...",
+			Value:       props.SearchQuery,
 			Class:       "max-w-xs",
+			Attributes:  templ.Attributes{"onkeydown": "performSearch()"},
 		})
 		@dropdown.Dropdown() {
 			@dropdown.Trigger() {

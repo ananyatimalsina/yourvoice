@@ -12,6 +12,7 @@ import (
 
 	"github.com/a-h/templ"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type ModelManagementProps struct {
@@ -31,7 +32,15 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 	sliceType := reflect.SliceOf(reflect.TypeOf(props.Model))
 	modelsSlice := reflect.New(sliceType).Interface()
 
-	searchValue := r.URL.Query().Get("search")
+	searchQuery := r.URL.Query().Get("search")
+
+	orderBy := r.URL.Query().Get("orderBy")
+	desc := ""
+	if strings.HasPrefix(orderBy, "-") {
+		desc = " desc"
+	}
+	orderField := utils.GetJSONTag(props.Model, strings.ReplaceAll(strings.TrimPrefix(orderBy, "-"), " ", ""))
+
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil || page <= 0 {
 		page = 1
@@ -49,8 +58,14 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 		db = db.Preload(field)
 	}
 
-	for _, field := range props.SearchFields {
-		db = db.Or(field+" ILIKE ?", "%"+searchValue+"%")
+	if searchQuery != "" {
+		for _, field := range props.SearchFields {
+			db = db.Or(field+" ILIKE ?", "%"+searchQuery+"%")
+		}
+	}
+
+	if orderField != "" {
+		db = db.Order(orderField + desc)
 	}
 
 	db = db.Offset((size * (page - 1))).Limit(size)
@@ -70,10 +85,12 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 	// }
 
 	modelManagerProps := modelmanagement.ModelManagerProps{
-		Title:      props.Title,
-		Headers:    props.Headers,
-		Rows:       rows,
-		ModalProps: props.ModalProps,
+		Title:        props.Title,
+		Headers:      props.Headers,
+		Rows:         rows,
+		ModalProps:   props.ModalProps,
+		SearchQuery:  searchQuery,
+		CurrentOrder: orderBy,
 	}
 
 	modelPage := modelmanagement.ModelManager(modelManagerProps)

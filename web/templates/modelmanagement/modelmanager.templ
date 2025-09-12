@@ -13,10 +13,12 @@ import (
 )
 
 type ModelManagerProps struct {
-	Title      string
-	Headers    []string
-	Rows       []RowProps
-	ModalProps ModalProps
+	Title        string
+	Headers      []string
+	Rows         []RowProps
+	ModalProps   ModalProps
+	SearchQuery  string
+	CurrentOrder string
 }
 
 templ ModelManager(props ModelManagerProps) {
@@ -31,20 +33,18 @@ templ ModelManager(props ModelManagerProps) {
 			<div class="flex-1 p-3"></div>
 		</div>
 	}
-	@FilterBar(FilterBarProps{Title: props.Title, SingularTitle: props.ModalProps.Title, Columns: props.Headers[1:]})
+	@FilterBar(FilterBarProps{Title: props.Title, SingularTitle: props.ModalProps.Title, SearchQuery: props.SearchQuery, Columns: props.Headers[1:]})
 	@table.Table() {
 		@table.Header() {
 			@table.Row() {
 				for i, header := range props.Headers {
 					if i == 0 {
 						@table.Head() {
-							<div class="flex gap-2 items-center">
-								@modelCheckbox("checkAll", header, "toggleSelectAll()")
-							</div>
+							@modelSortingDropdown(modelSortingDropdownProps{Field: header, FieldComponent: modelCheckbox(modelCheckboxProps{ID: "checkAll", LabelText: header, OnChange: "toggleSelectAll()"}), CurrentOrder: props.CurrentOrder})
 						}
 					} else {
 						@table.Head() {
-							{ header }
+							@modelSortingDropdown(modelSortingDropdownProps{Field: header, CurrentOrder: props.CurrentOrder})
 						}
 					}
 				}
@@ -75,7 +75,7 @@ templ ModelRow(props RowProps) {
 		for i, cell := range props.Cells {
 			if i == 0 {
 				@table.Cell() {
-					@modelCheckbox("check-"+strconv.FormatUint(ID, 10), cell, "toggleSelectModel(this)")
+					@modelCheckbox(modelCheckboxProps{ID: "check-" + strconv.FormatUint(ID, 10), LabelText: cell, OnChange: "toggleSelectModel(this)"})
 				}
 			} else {
 				@table.Cell() {
@@ -88,6 +88,58 @@ templ ModelRow(props RowProps) {
 				EditAction:   templ.JSFuncCall("openModelModal", props.ModalTitle, props.Model),
 				DeleteAction: "ajax('', {method: 'DELETE', target: 'row-" + strconv.FormatUint(ID, 10) + "', swap: 'remove'})",
 			})
+		}
+	}
+}
+
+type modelSortingDropdownProps struct {
+	Field          string
+	FieldComponent templ.Component
+	CurrentOrder   string
+}
+
+templ modelSortingDropdown(props modelSortingDropdownProps) {
+	@dropdown.Dropdown() {
+		<div class="flex gap-1 items-center">
+			if props.FieldComponent != nil {
+				@props.FieldComponent
+			} else {
+				{ props.Field }
+			}
+			@dropdown.Trigger() {
+				@button.Button(button.Props{
+					ID:      "order-" + props.Field,
+					Variant: button.VariantGhost,
+				}) {
+					if props.CurrentOrder == props.Field {
+						@icon.ArrowUp()
+					} else if props.CurrentOrder == "-"+props.Field {
+						@icon.ArrowDown()
+					} else {
+						@icon.ArrowUpDown()
+					}
+				}
+			}
+		</div>
+		@dropdown.Content(dropdown.ContentProps{Placement: dropdown.PlacementBottom}) {
+			@dropdown.Group() {
+				@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"onClick": "orderModels(this, '" + props.Field + "')"}}) {
+					<span
+						class="flex items-center"
+					>
+						@icon.ArrowUp(icon.Props{Class: "mr-2"})
+						Asc
+					</span>
+				}
+				@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"onCLick": "orderModels(this, '-" + props.Field + "')"}}) {
+					<span
+						class="flex items-center"
+					>
+						@icon.ArrowDown(icon.Props{Class: "mr-2"})
+						Desc
+					</span>
+				}
+			}
 		}
 	}
 }
@@ -143,20 +195,26 @@ templ modelDropdown(props modelDropdownProps) {
 	}
 }
 
-templ modelCheckbox(ID string, labelText string, onchange string) {
+type modelCheckboxProps struct {
+	ID        string
+	LabelText string
+	OnChange  string
+}
+
+templ modelCheckbox(props modelCheckboxProps) {
 	<div class="flex gap-2 items-center">
 		@checkbox.Checkbox(checkbox.Props{
-			ID:    ID,
-			Name:  ID,
-			Value: ID,
+			ID: props.ID,
 			Attributes: templ.Attributes{
-				"onchange": onchange,
+				"onchange": props.OnChange,
 			},
 		})
-		@label.Label(label.Props{
-			For: ID,
-		}) {
-			{ labelText }
+		if props.LabelText != "" {
+			@label.Label(label.Props{
+				For: props.ID,
+			}) {
+				{ props.LabelText }
+			}
 		}
 	</div>
 }
