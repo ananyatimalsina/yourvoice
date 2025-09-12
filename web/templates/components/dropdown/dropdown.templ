@@ -70,6 +70,7 @@ type ItemProps struct {
 	Class        string
 	Attributes   templ.Attributes
 	Disabled     bool
+	OnClick      templ.ComponentScript
 	Href         string
 	Target       string
 	PreventClose bool
@@ -240,6 +241,9 @@ templ Item(props ...ItemProps) {
 			if p.Target != "" {
 				target={ p.Target }
 			}
+			if (templ.ComponentScript{}) != p.OnClick {
+				onClick={ p.OnClick }
+			}
 			class={
 				utils.TwMerge(
 					"flex text-left items-center justify-between px-2 py-1.5 text-sm rounded-sm",
@@ -367,7 +371,7 @@ templ SubTrigger(props ...SubTriggerProps) {
 			<span>
 				{ children... }
 			</span>
-			<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-auto">
+			<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="ml-auto w-4 h-4">
 				<path d="M6.5 3L11.5 8L6.5 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
 			</svg>
 		</button>

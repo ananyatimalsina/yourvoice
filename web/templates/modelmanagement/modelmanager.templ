@@ -165,13 +165,9 @@ templ modelDropdown(props modelDropdownProps) {
 		}
 		@dropdown.Content() {
 			@dropdown.Group() {
-				@dropdown.Item() {
+				@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"data-tui-dialog-trigger": "modelModal", "data-dialog-instance": "modelModal", "data-tui-dialog-trigger-open": "false"}, OnClick: props.EditAction}) {
 					<span
-						data-tui-dialog-trigger="modelModal"
-						data-dialog-instance="modelModal"
-						data-tui-dialog-trigger-open="false"
 						class="flex items-center group"
-						onClick={ props.EditAction }
 					>
 						@icon.Pencil(icon.Props{Size: 16, Class: "mr-2"})
 						Edit
