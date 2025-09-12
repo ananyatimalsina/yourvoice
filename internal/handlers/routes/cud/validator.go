@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"yourvoice/internal/utils"
 )
 
 func ValidateStruct[T any](request T, ignoreUnique bool) (string, error) {
@@ -21,7 +22,7 @@ func ValidateStruct[T any](request T, ignoreUnique bool) (string, error) {
 				if ignoreUnique && hasUniqueTag(getGormTag(request, ve.StructField())) {
 					continue
 				}
-				jsonTag := getJSONTag(request, ve.StructField())
+				jsonTag := utils.GetJSONTag(request, ve.StructField())
 				msg := ve.ActualTag()
 
 				components["message-"+jsonTag] = msg
@@ -47,7 +48,7 @@ func ValidateGorm[T any](request T, err error) (string, error) {
 		fields := getFieldsWithUniqueTag(request)
 
 		for _, field := range fields {
-			jsonTag := getJSONTag(request, field)
+			jsonTag := utils.GetJSONTag(request, field)
 			components["message-"+jsonTag] = err.Error()
 		}
 		jsonData, err := json.Marshal(components)
@@ -89,22 +90,6 @@ func GetIdsFromAjax(r *http.Request) ([]uint64, error) {
 	}
 
 	return ids, nil
-}
-
-func getJSONTag(obj any, fieldName string) string {
-	typ := reflect.TypeOf(obj)
-	// If obj is a pointer, get the element type
-	if typ.Kind() == reflect.Ptr {
-		typ = typ.Elem()
-	}
-	field, found := typ.FieldByName(fieldName)
-	if found {
-		tag := field.Tag.Get("json")
-		if tag != "" {
-			return tag
-		}
-	}
-	return fieldName // fallback to struct field name
 }
 
 func getGormTag(obj any, fieldName string) string {

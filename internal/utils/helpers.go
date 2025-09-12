@@ -42,6 +42,22 @@ func GetModelID(model any) uint64 {
 	}
 }
 
+func GetJSONTag(obj any, fieldName string) string {
+	typ := reflect.TypeOf(obj)
+	// If obj is a pointer, get the element type
+	if typ.Kind() == reflect.Ptr {
+		typ = typ.Elem()
+	}
+	field, found := typ.FieldByName(fieldName)
+	if found {
+		tag := field.Tag.Get("json")
+		if tag != "" {
+			return tag
+		}
+	}
+	return fieldName // fallback to struct field name
+}
+
 func BuildRelationshipFieldInputOptions(db *gorm.DB, modelType any) []InputOption {
 	sliceType := reflect.SliceOf(reflect.TypeOf(modelType))
 	modelsSlice := reflect.New(sliceType).Interface()
