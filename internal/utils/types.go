@@ -9,6 +9,13 @@ import (
 	"time"
 )
 
+type Model struct {
+	ID        uint           `json:"ID" gorm:"primaryKey"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+}
+
 type Expression struct {
 	ID   uint   `json:"ID" gorm:"primaryKey"`
 	Data string `json:"data" validate:"required" gorm:"not null"`

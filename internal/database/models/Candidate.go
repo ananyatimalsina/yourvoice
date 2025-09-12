@@ -1,9 +1,11 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"yourvoice/internal/utils"
+)
 
 type Candidate struct {
-	gorm.Model
+	utils.Model
 	Votes      []Vote       `json:"votes"`
 	VoteEvents []*VoteEvent `json:"vote_events" gorm:"many2many:vote_event_candidates"`
 	PartyID    uint         `json:"party_id"`

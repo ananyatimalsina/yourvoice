@@ -1,9 +1,11 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"yourvoice/internal/utils"
+)
 
 type Party struct {
-	gorm.Model
+	utils.Model
 	Candidates []Candidate `json:"candidates"`
 	Name       string      `json:"name" validate:"required" gorm:"not null;unique"`
 	Platform   string      `json:"platform" validate:"required,url" gorm:"not null"`
