@@ -35,11 +35,6 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 	searchQuery := r.URL.Query().Get("search")
 
 	orderBy := r.URL.Query().Get("orderBy")
-	desc := ""
-	if strings.HasPrefix(orderBy, "-") {
-		desc = " desc"
-	}
-	orderField := utils.GetJSONTag(props.Model, strings.ReplaceAll(strings.TrimPrefix(orderBy, "-"), " ", ""))
 
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil || page <= 0 {
@@ -64,9 +59,7 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 		}
 	}
 
-	if orderField != "" {
-		db = db.Order(orderField + desc)
-	}
+	db = getOrder(db, props.Model, orderBy, props.ModalProps.Title, props.Title)
 
 	db = db.Offset((size * (page - 1))).Limit(size)
 
@@ -127,4 +120,43 @@ func getRows(modelsSlice any, mkRow func(model any) modelmanagement.RowProps) []
 	}
 
 	return rows
+}
+
+func getOrder(db *gorm.DB, obj any, userField string, singular string, plural string) *gorm.DB {
+	desc := ""
+	if strings.HasPrefix(userField, "-") {
+		desc = " desc"
+	}
+	userField = strings.ReplaceAll(strings.TrimPrefix(userField, "-"), " ", "")
+	singular = strings.ToLower(singular)
+	plural = strings.ToLower(plural)
+
+	typ := reflect.TypeOf(obj)
+	if typ.Kind() == reflect.Ptr {
+		typ = typ.Elem()
+	}
+	field, found := typ.FieldByName(userField)
+	if !found {
+		// Field not found, return db unmodified
+		return db
+	}
+
+	jsonTag := utils.GetJSONTag(obj, userField)
+	if jsonTag == "" {
+		return db
+	}
+
+	// Check if field is a slice (relation)
+	if field.Type.Kind() == reflect.Slice {
+		// Example: Candidates []Candidate
+		// You might want to support more relations, but here's for Candidates
+		// Assumes Candidate has a party_id foreign key
+		join := "LEFT JOIN " + jsonTag + " ON " + jsonTag + "." + singular + "_id = " + plural + ".id"
+		group := plural + ".id"
+		order := "COUNT(" + jsonTag + ".id)" + desc
+		return db.Joins(join).Group(group).Order(order)
+	} else {
+		// Regular field
+		return db.Order(jsonTag + desc)
+	}
 }
