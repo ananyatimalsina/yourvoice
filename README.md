@@ -3,6 +3,7 @@
 **Anonymous eVoting & Feedback Platform**
 
 YourVoice is a cryptographically secure anonymous voting platform that uses RSA blind signatures to ensure voter privacy while preventing double-voting. Built with Go, PostgreSQL, and modern web technologies.
+Youths for Digital Governance Discord: https://discord.gg/5fuFchDAyG
 
 ## 🔐 Features
 
