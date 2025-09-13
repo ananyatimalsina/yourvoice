@@ -1,0 +1,220 @@
+package modelmanagement
+
+import (
+	"yourvoice/web/templates/components/table"
+	"yourvoice/web/templates/components/sidebar"
+	"yourvoice/web/templates/components/checkbox"
+	"yourvoice/web/templates/components/label"
+	"yourvoice/web/templates/components/button"
+	"yourvoice/web/templates/components/icon"
+	"yourvoice/web/templates/components/dropdown"
+	"yourvoice/internal/utils"
+	"strconv"
+)
+
+type ModelManagerProps struct {
+	Title        string
+	Headers      []string
+	Rows         []RowProps
+	ModalProps   ModalProps
+	SearchQuery  string
+	CurrentOrder string
+}
+
+templ ModelManager(props ModelManagerProps) {
+	@Modal(props.ModalProps)
+	@sidebar.Inset() {
+		<div class="flex flex-col h-full">
+			<div class="flex gap-4 items-center px-6 h-14">
+				@sidebar.Trigger(sidebar.TriggerProps{Target: "sidebar"})
+				<span id>{ props.Title }</span>
+			</div>
+			@sidebar.Separator()
+			<div class="flex-1 p-3"></div>
+		</div>
+	}
+	@FilterBar(FilterBarProps{Title: props.Title, SingularTitle: props.ModalProps.Title, SearchQuery: props.SearchQuery, Columns: props.Headers[1:]})
+	@table.Table() {
+		@table.Header() {
+			@table.Row() {
+				for i, header := range props.Headers {
+					if i == 0 {
+						@table.Head() {
+							@modelSortingDropdown(modelSortingDropdownProps{Field: header, FieldComponent: modelCheckbox(modelCheckboxProps{ID: "checkAll", LabelText: header, OnChange: "toggleSelectAll()"}), CurrentOrder: props.CurrentOrder})
+						}
+					} else {
+						@table.Head() {
+							@modelSortingDropdown(modelSortingDropdownProps{Field: header, CurrentOrder: props.CurrentOrder})
+						}
+					}
+				}
+				@table.Head() {
+					@modelDropdown(modelDropdownProps{ID: "dropdownTriggerAll", Disabled: true, EditAction: templ.JSFuncCall("openModelModal", props.Title, nil, true), DeleteAction: "ajax('', {method: 'DELETE', targets: Array.from(selectedModels), swap: 'remove'})"})
+				}
+			}
+		}
+		@templ.Fragment("datatable") {
+			@table.Body(table.BodyProps{ID: "datatable"}) {
+				for _, row := range props.Rows {
+					@ModelRow(row)
+				}
+			}
+		}
+	}
+}
+
+type RowProps struct {
+	Model      any
+	Cells      []string
+	ModalTitle string
+}
+
+templ ModelRow(props RowProps) {
+	{{ ID := utils.GetModelID(props.Model) }}
+	@table.Row(table.RowProps{ID: "row-" + strconv.FormatUint(ID, 10)}) {
+		for i, cell := range props.Cells {
+			if i == 0 {
+				@table.Cell() {
+					@modelCheckbox(modelCheckboxProps{ID: "check-" + strconv.FormatUint(ID, 10), LabelText: cell, OnChange: "toggleSelectModel(this)"})
+				}
+			} else {
+				@table.Cell() {
+					{ cell }
+				}
+			}
+		}
+		@table.Cell() {
+			@modelDropdown(modelDropdownProps{
+				EditAction:   templ.JSFuncCall("openModelModal", props.ModalTitle, props.Model),
+				DeleteAction: "ajax('', {method: 'DELETE', target: 'row-" + strconv.FormatUint(ID, 10) + "', swap: 'remove'})",
+			})
+		}
+	}
+}
+
+type modelSortingDropdownProps struct {
+	Field          string
+	FieldComponent templ.Component
+	CurrentOrder   string
+}
+
+templ modelSortingDropdown(props modelSortingDropdownProps) {
+	@dropdown.Dropdown() {
+		<div class="flex gap-1 items-center">
+			if props.FieldComponent != nil {
+				@props.FieldComponent
+			} else {
+				{ props.Field }
+			}
+			@dropdown.Trigger() {
+				@button.Button(button.Props{
+					ID:      "order-" + props.Field,
+					Variant: button.VariantGhost,
+				}) {
+					if props.CurrentOrder == props.Field {
+						@icon.ArrowUp()
+					} else if props.CurrentOrder == "-"+props.Field {
+						@icon.ArrowDown()
+					} else {
+						@icon.ArrowUpDown()
+					}
+				}
+			}
+		</div>
+		@dropdown.Content(dropdown.ContentProps{Placement: dropdown.PlacementBottom}) {
+			@dropdown.Group() {
+				@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"onClick": "orderModels(this, '" + props.Field + "')"}}) {
+					<span
+						class="flex items-center"
+					>
+						@icon.ArrowUp(icon.Props{Size: 16, Class: "mr-2"})
+						Asc
+					</span>
+				}
+				@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"onCLick": "orderModels(this, '-" + props.Field + "')"}}) {
+					<span
+						class="flex items-center"
+					>
+						@icon.ArrowDown(icon.Props{Size: 16, Class: "mr-2"})
+						Desc
+					</span>
+				}
+			}
+		}
+	}
+}
+
+type modelDropdownProps struct {
+	ID           string
+	Disabled     bool
+	EditAction   templ.ComponentScript
+	DeleteAction string
+}
+
+templ modelDropdown(props modelDropdownProps) {
+	@dropdown.Dropdown() {
+		@dropdown.Trigger() {
+			@button.Button(button.Props{
+				ID:       props.ID,
+				Size:     button.SizeIcon,
+				Variant:  button.VariantGhost,
+				Disabled: props.Disabled,
+			}) {
+				@icon.Ellipsis()
+			}
+		}
+		@dropdown.Content() {
+			@dropdown.Group() {
+				@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"data-tui-dialog-trigger": "modelModal", "data-dialog-instance": "modelModal", "data-tui-dialog-trigger-open": "false"}, OnClick: props.EditAction}) {
+					<span
+						class="flex items-center group"
+					>
+						@icon.Pencil(icon.Props{Size: 16, Class: "mr-2"})
+						Edit
+					</span>
+				}
+				@dropdown.Item(dropdown.ItemProps{Href: "#", Target: "_blank"}) {
+					<span class="flex items-center">
+						@icon.Copy(icon.Props{Size: 16, Class: "mr-2"})
+						Copy
+					</span>
+				}
+				@dropdown.Separator()
+				@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"onClick": props.DeleteAction}}) {
+					<span class="flex items-center text-destructive">
+						@icon.Delete(icon.Props{Size: 16, Class: "mr-2"})
+						Delete
+					</span>
+				}
+			}
+		}
+	}
+}
+
+type modelCheckboxProps struct {
+	ID        string
+	LabelText string
+	OnChange  string
+}
+
+templ modelCheckbox(props modelCheckboxProps) {
+	<div class="flex gap-2 items-center">
+		@checkbox.Checkbox(checkbox.Props{
+			ID: props.ID,
+			Attributes: templ.Attributes{
+				"onchange": props.OnChange,
+			},
+		})
+		if props.LabelText != "" {
+			@label.Label(label.Props{
+				For: props.ID,
+			}) {
+				{ props.LabelText }
+			}
+		}
+	</div>
+}
+
+templ ModelmanagerScript() {
+	<script defer nonce={ templ.GetNonce(ctx) } src="/static/js/modelmanagement/modelmanager.js"></script>
+}

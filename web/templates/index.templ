@@ -1,0 +1,148 @@
+package templates
+
+import (
+	"yourvoice/web/templates/components/sidebar"
+	"yourvoice/web/templates/components/dropdown"
+	"yourvoice/web/templates/components/popover"
+	"yourvoice/web/templates/components/icon"
+	"yourvoice/web/templates/components/collapsible"
+	"yourvoice/web/templates/components/label"
+	"yourvoice/web/templates/components/dialog"
+	"yourvoice/web/templates/components/input"
+	"yourvoice/web/templates/modelmanagement"
+)
+
+// TODO div main is missing styling for padding on mobile sidebar
+templ Layout(Title string) {
+	<!DOCTYPE html>
+	<html lang="en" class="h-full">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ Title } - YourVoice Admin</title>
+			<link rel="stylesheet" href="/static/output.css"/>
+			<script defer src="/static/ajax.js"></script>
+			@modelmanagement.ModelmanagerScript()
+			@modelmanagement.ModelModalScript()
+			@modelmanagement.ModelFilterBarScript()
+			@sidebar.Script()
+			@dropdown.Script()
+			@popover.Script()
+			@collapsible.Script()
+			@label.Script()
+			@dialog.Script()
+			@input.Script()
+		</head>
+		<body class="h-full">
+			<div class="flex h-full">
+				@sidebar.Layout() {
+					@sidebar.Sidebar(sidebar.Props{
+						ID:          "sidebar",
+						Collapsible: sidebar.CollapsibleIcon,
+						Variant:     sidebar.VariantFloating,
+					}) {
+						@sidebar.Header() {
+							@sidebar.Menu() {
+								@sidebar.MenuItem() {
+									@sidebar.MenuButton(sidebar.MenuButtonProps{Href: "/admin"}) {
+										@icon.House(icon.Props{Class: "size-4"})
+										<span class="font-semibold">YourVoice Admin</span>
+									}
+								}
+							}
+						}
+						@sidebar.Content() {
+							@sidebar.Group() {
+								@sidebar.GroupLabel() {
+									Voting System
+								}
+								@sidebar.MenuItem() {
+									@collapsible.Collapsible(collapsible.Props{Open: true, Class: "group/collapsible w-full"}) {
+										@collapsible.Trigger() {
+											@sidebar.MenuButton(sidebar.MenuButtonProps{Tooltip: "Manage Voting System"}) {
+												@icon.Database(icon.Props{Class: "size-4"})
+												<span>CRM</span>
+												@icon.ChevronRight(icon.Props{
+													Class: "ml-auto size-4 transition-transform group-data-[tui-collapsible-state=open]/collapsible:rotate-90",
+												})
+											}
+										}
+										@collapsible.Content() {
+											@sidebar.MenuSub() {
+												@sidebar.MenuSubItem() {
+													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
+														Attributes: templ.Attributes{
+															"onclick": "ajax('/admin/votes/events', {target: 'main', swap: 'update', modelManagementRequest: true})",
+														},
+													}) {
+														<span>Events</span>
+													}
+												}
+												@sidebar.MenuSubItem() {
+													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
+														Attributes: templ.Attributes{
+															"onclick": "ajax('/admin/votes/parties', {target: 'main', swap: 'update', modelManagementRequest: true})",
+														},
+													}) {
+														<span>Parties</span>
+													}
+												}
+												@sidebar.MenuSubItem() {
+													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
+														Href: "/admin/votes/candidates",
+													}) {
+														<span>Candidates</span>
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+							@sidebar.Separator()
+							@sidebar.Group() {
+								@sidebar.GroupLabel() {
+									Feedback System
+								}
+								@sidebar.MenuItem() {
+									@collapsible.Collapsible(collapsible.Props{Open: true, Class: "group/collapsible w-full"}) {
+										@collapsible.Trigger() {
+											@sidebar.MenuButton(sidebar.MenuButtonProps{Tooltip: "Manage Feedback System"}) {
+												@icon.Database(icon.Props{Class: "size-4"})
+												<span>CRM</span>
+												@icon.ChevronRight(icon.Props{
+													Class: "ml-auto size-4 transition-transform group-data-[tui-collapsible-state=open]/collapsible:rotate-90",
+												})
+											}
+										}
+										@collapsible.Content() {
+											@sidebar.MenuSub() {
+												@sidebar.MenuSubItem() {
+													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
+														Href: "/admin/feedback/sessions",
+													}) {
+														<span>Sessions</span>
+													}
+												}
+												@sidebar.MenuSubItem() {
+													@sidebar.MenuSubButton(sidebar.MenuSubButtonProps{
+														Href: "/admin/feedback/messages",
+													}) {
+														<span>Messages</span>
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				<main id="main" class="overflow-auto flex-1">
+					{ children... }
+				</main>
+			</div>
+		</body>
+	</html>
+}

@@ -1,0 +1,77 @@
+package modelmanagement
+
+import (
+	"yourvoice/web/templates/components/button"
+	"yourvoice/web/templates/components/dialog"
+	"yourvoice/web/templates/components/input"
+	"yourvoice/web/templates/components/icon"
+	"yourvoice/web/templates/components/dropdown"
+	"strconv"
+)
+
+type FilterBarProps struct {
+	Title         string
+	SingularTitle string
+	SearchQuery   string
+	Columns       []string
+	Actions       []templ.Component
+}
+
+templ FilterBar(props FilterBarProps) {
+	<div id="modelBar" class="flex gap-4 items-center pr-2 pb-2" method="GET" action="">
+		@input.Input(input.Props{
+			ID:          "search",
+			Name:        "search",
+			Type:        input.TypeSearch,
+			Placeholder: "Search " + props.Title + "...",
+			Value:       props.SearchQuery,
+			Class:       "max-w-xs",
+			Attributes:  templ.Attributes{"onkeydown": "performSearch()"},
+		})
+		@dropdown.Dropdown() {
+			@dropdown.Trigger() {
+				@button.Button(button.Props{
+					Variant: button.VariantOutline,
+				}) {
+					@icon.SlidersHorizontal()
+					View
+				}
+			}
+			@dropdown.Content() {
+				@dropdown.Group() {
+					@dropdown.Label() {
+						Toggle Columns
+					}
+					@dropdown.Separator()
+					for i, column := range props.Columns {
+						@dropdown.Item(dropdown.ItemProps{
+							Attributes: templ.Attributes{"onClick": "toggleVisibility(this, " + strconv.Itoa(i+1) + ")"},
+						}) {
+							<span class="flex items-center">
+								@icon.Check(icon.Props{Size: 16, Class: "mr-2"})
+								{ column }
+							</span>
+						}
+					}
+				}
+			}
+		}
+		if len(props.Actions) > 0 {
+			for _, action := range props.Actions {
+				@action
+			}
+		} else {
+			@dialog.Trigger(dialog.TriggerProps{
+				For: "modelModal",
+			}) {
+				@button.Button(button.Props{Attributes: templ.Attributes{"onClick": "openModelModal('" + props.SingularTitle + "')"}}) {
+					New { props.SingularTitle }
+				}
+			}
+		}
+	</div>
+}
+
+templ ModelFilterBarScript() {
+	<script defer nonce={ templ.GetNonce(ctx) } src="/static/js/modelmanagement/filterbar.js"></script>
+}
