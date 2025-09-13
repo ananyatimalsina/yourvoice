@@ -1,29 +1,63 @@
 package utils
 
 import (
-	"encoding/json"
 	"github.com/a-h/templ"
-	"github.com/ananyatimalsina/schema"
 	"gorm.io/gorm"
 	"reflect"
 	"strconv"
 )
 
-func RegisterJSONSlicePtr[T any](decoder *schema.Decoder, example []T) {
-	decoder.RegisterConverter(example, func(s string) reflect.Value {
-		if s == "" || s == "[]" {
-			return reflect.ValueOf(example)
-		}
-		var v []T
-		err := json.Unmarshal([]byte(s), &v)
+func GetModelID(model any) uint64 {
+	if model == nil {
+		return 0
+	}
+
+	val := reflect.ValueOf(model)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	if val.Kind() != reflect.Struct {
+		return 0
+	}
+
+	idField := val.FieldByName("ID")
+	if !idField.IsValid() {
+		return 0
+	}
+
+	switch idField.Kind() {
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return idField.Uint()
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return uint64(idField.Int())
+	case reflect.String:
+		u64, err := strconv.ParseUint(idField.String(), 10, 64)
 		if err != nil {
-			return reflect.Value{}
+			return 0
 		}
-		return reflect.ValueOf(v)
-	})
+		return u64
+	default:
+		return 0
+	}
 }
 
-// Fix umlauts being a problem
+func GetJSONTag(obj any, fieldName string) string {
+	typ := reflect.TypeOf(obj)
+	// If obj is a pointer, get the element type
+	if typ.Kind() == reflect.Ptr {
+		typ = typ.Elem()
+	}
+	field, found := typ.FieldByName(fieldName)
+	if found {
+		tag := field.Tag.Get("json")
+		if tag != "" {
+			return tag
+		}
+	}
+	return ""
+}
+
 func BuildRelationshipFieldInputOptions(db *gorm.DB, modelType any) []InputOption {
 	sliceType := reflect.SliceOf(reflect.TypeOf(modelType))
 	modelsSlice := reflect.New(sliceType).Interface()

@@ -1,21 +1,17 @@
 package handlers
 
 import (
+	"github.com/a-h/templ"
+	"gorm.io/gorm"
 	"net/http"
-	"yourvoice/internal/database/models"
 	"yourvoice/internal/handlers/routes/expression"
 	"yourvoice/internal/handlers/routes/identity"
-	"yourvoice/internal/handlers/routes/modelmanagement"
-	"yourvoice/internal/handlers/views/admin/vote"
+	"yourvoice/internal/handlers/views"
 	"yourvoice/internal/middleware"
-	"yourvoice/web/templates/admin/pages"
-
-	"github.com/a-h/templ"
-	"github.com/ananyatimalsina/schema"
-	"gorm.io/gorm"
+	"yourvoice/web/templates"
 )
 
-func LoadHanders(router *http.ServeMux, db *gorm.DB, decoder *schema.Decoder) {
+func LoadHanders(router *http.ServeMux, db *gorm.DB) {
 	// Index page
 	//router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 	//	tmpl := template.Must(template.ParseFiles("web/templates/index.html"))
@@ -48,26 +44,14 @@ func LoadHanders(router *http.ServeMux, db *gorm.DB, decoder *schema.Decoder) {
 
 	adminRouter := http.NewServeMux()
 
-	adminRouter.Handle("/", templ.Handler(pages.Dashboard()))
-	adminRouter.Handle("/data/logs", templ.Handler(pages.SystemLogs()))
+	adminRouter.Handle("/", templ.Handler(templates.Layout("Admin")))
 
 	adminVoteRouter := http.NewServeMux()
 
-	// Event management
-	adminVoteRouter.HandleFunc("GET /events", func(w http.ResponseWriter, r *http.Request) {
-		admin_vote.Events(w, r, db)
-	})
-	adminVoteRouter.HandleFunc("DELETE /events", func(w http.ResponseWriter, r *http.Request) {
-		modelmanagement.DeleteModel(w, r, db, &models.VoteEvent{})
-	})
-
 	// Party management
-	admin_vote.RegisterPartyRoutes(adminVoteRouter, db, decoder)
+	views.RegisterPartyRoutes(adminVoteRouter, db)
 
-	// Candidate management
-	admin_vote.RegisterCandidateRoutes(adminVoteRouter, db, decoder)
-
-	adminRouter.Handle("/vote/", http.StripPrefix("/vote", adminVoteRouter))
+	adminRouter.Handle("/votes/", http.StripPrefix("/votes", adminVoteRouter))
 
 	router.Handle("/admin/", http.StripPrefix("/admin", adminRouter))
 }

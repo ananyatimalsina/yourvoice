@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/ananyatimalsina/schema"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
@@ -11,18 +10,13 @@ import (
 	"yourvoice/internal/middleware"
 )
 
-var decoder *schema.Decoder
-
 func main() {
 	godotenv.Load(".env")
-	decoder = schema.NewDecoder()
-	decoder.ZeroEmpty(true)
-	db := database.LoadDatabase(decoder)
+	db := database.LoadDatabase()
 	port := os.Getenv("SERVER_PORT")
 	router := http.NewServeMux()
 
 	stack := middleware.CreateStack(
-		middleware.LogOriginalURL,
 		middleware.Logging,
 	)
 
@@ -34,7 +28,7 @@ func main() {
 	// Static files
 	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 
-	handlers.LoadHanders(router, db, decoder)
+	handlers.LoadHanders(router, db)
 
 	log.Println("Server started at http://localhost:" + port)
 	log.Fatal(server.ListenAndServe())

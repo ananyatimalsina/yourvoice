@@ -1,0 +1,7 @@
+{
+  "componentsDir": "web/templates/components",
+  "utilsDir": "internal/utils",
+  "moduleName": "yourvoice",
+  "jsDir": "web/static/js",
+  "jsPublicPath": "/static/js"
+}

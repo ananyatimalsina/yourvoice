@@ -1,0 +1,81 @@
+package modelmanagement
+
+import (
+	"yourvoice/web/templates/components/dialog"
+	"yourvoice/web/templates/components/form"
+	"yourvoice/web/templates/components/input"
+	"yourvoice/web/templates/components/button"
+	"strconv"
+)
+
+type ModalProps struct {
+	Title         string
+	FormItemProps []FormItemProps
+}
+
+type FormItemProps struct {
+	ID          string
+	Label       string
+	Placeholder string
+	Type        input.Type
+	Required    bool
+	Unique      bool
+	Description string
+	Message     string
+}
+
+templ Modal(props ModalProps) {
+	@dialog.Dialog(dialog.Props{ID: "modelModal"}) {
+		@dialog.Content(
+			dialog.ContentProps{Class: "max-w-md"},
+		) {
+			@dialog.Header() {
+				@dialog.Title(dialog.TitleProps{ID: "modelModalTitle"}) {
+					Manage { props.Title }
+				}
+			}
+			<div class="space-y-4">
+				for _, item := range props.FormItemProps {
+					@form.Item() {
+						@form.Label(form.LabelProps{For: item.ID}) {
+							{ item.Label }
+						}
+						@input.Input(input.Props{
+							ID:          item.ID,
+							Type:        item.Type,
+							Placeholder: item.Placeholder,
+							Required:    item.Required,
+							Attributes:  templ.Attributes{"unique": strconv.FormatBool(item.Unique)},
+						})
+						@form.Description() {
+							{ item.Description }
+						}
+						@form.Message(form.MessageProps{
+							ID:      "message-" + item.ID,
+							Variant: form.MessageVariantError,
+						}) {
+							{ item.Message }
+						}
+					}
+				}
+			</div>
+			@dialog.Footer() {
+				@dialog.Close() {
+					@button.Button(button.Props{
+						Variant: button.VariantOutline,
+						ID:      "modelModalClose",
+					}) {
+						Cancel
+					}
+				}
+				@button.Button(button.Props{ID: "modelModalSubmit"}) {
+					Save changes
+				}
+			}
+		}
+	}
+}
+
+templ ModelModalScript() {
+	<script defer nonce={ templ.GetNonce(ctx) } src="/static/js/modelmanagement/modelModal.js"></script>
+}
