@@ -10,14 +10,21 @@ import (
 	"yourvoice/web/templates/modelmanagement"
 )
 
+type SafeParty struct {
+	models.Party
+	Candidates     int `json:"candidate_count"`
+	CandidateCount int `json:"-"`
+}
+
 func RegisterPartyRoutes(mux *http.ServeMux, db *gorm.DB) {
 	modelManagementProps := ModelManagementProps{
-		Model:         models.Party{},
-		Title:         "Parties",
-		PreloadFields: []string{"Candidates"},
-		SearchFields:  []string{"name"},
-		Headers:       []string{"Name", "Candidates", "Created At"},
-		MkRow:         mkRow,
+		Model:        models.Party{},
+		SafeModel:    SafeParty{},
+		Title:        "Parties",
+		SearchFields: []string{"name"},
+		Headers:      []string{"Name", "Candidates", "Created At"},
+		PrepareDB:    prepareDB,
+		MkRow:        mkRow,
 		ModalProps: modelmanagement.ModalProps{Title: "Party", FormItemProps: []modelmanagement.FormItemProps{
 			{ID: "name", Label: "Name", Placeholder: "Sunshine Party", Type: input.TypeText, Required: true, Unique: true, Description: "The name of the party."},
 			{ID: "platform", Label: "Platform", Placeholder: "https://sunshine.example.com/platform", Type: input.TypeURL, Required: true, Unique: false, Description: "Link to the platform of the party."},
@@ -41,9 +48,16 @@ func RegisterPartyRoutes(mux *http.ServeMux, db *gorm.DB) {
 	})
 }
 
+func prepareDB(db *gorm.DB) *gorm.DB {
+	return db.Model(&models.Party{}).
+		Joins("LEFT JOIN candidates ON candidates.party_id = parties.id").
+		Select("parties.*, COUNT(candidates.id) as candidate_count").
+		Group("parties.id")
+}
+
 func mkRow(model any) modelmanagement.RowProps {
-	party := model.(models.Party)
-	candidateCount := strconv.Itoa(len(party.Candidates))
+	party := model.(SafeParty)
+	candidateCount := strconv.Itoa(party.CandidateCount)
 	createdAt := party.CreatedAt.Format("Jan 2, 2006")
 
 	return modelmanagement.RowProps{

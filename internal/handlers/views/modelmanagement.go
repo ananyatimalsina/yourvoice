@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"strings"
 	"yourvoice/internal/utils"
 	"yourvoice/web/templates"
 	"yourvoice/web/templates/modelmanagement"
@@ -28,12 +29,27 @@ type ModelManagementProps struct {
 // TODO: Fix JS errors for modal.Model = null && persistant model data on create
 func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props ModelManagementProps) {
 	ctx := r.Context()
-	sliceType := reflect.SliceOf(reflect.TypeOf(props.Model))
+
+	var managerModel any
+	if props.SafeModel != nil {
+		managerModel = props.SafeModel
+	} else {
+		managerModel = props.Model
+	}
+
+	sliceType := reflect.SliceOf(reflect.TypeOf(managerModel))
 	modelsSlice := reflect.New(sliceType).Interface()
 
 	searchQuery := r.URL.Query().Get("search")
 
 	orderBy := r.URL.Query().Get("orderBy")
+	desc := ""
+	if strings.HasPrefix(orderBy, "-") {
+
+		desc = " desc"
+
+	}
+	orderField := utils.GetJSONTag(managerModel, strings.ReplaceAll(strings.TrimPrefix(orderBy, "-"), " ", ""))
 
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil || page <= 0 {
@@ -47,17 +63,16 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 	totalItems := int64(0)
 	db.Model(&props.Model).Count(&totalItems)
 
-	// var managerModel any
-	// if props.SafeModel != nil {
-	// 	managerModel = props.SafeModel
-	// } else {
-	// 	managerModel = props.Model
-	// }
-
 	if searchQuery != "" {
 		for _, field := range props.SearchFields {
 			db = db.Or(field+" ILIKE ?", "%"+searchQuery+"%")
 		}
+	}
+
+	db = props.PrepareDB(db)
+
+	if orderField != "" {
+		db = db.Order(orderField + desc)
 	}
 
 	db = db.Offset((size * (page - 1))).Limit(size)
