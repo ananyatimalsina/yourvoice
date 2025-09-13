@@ -1,0 +1,187 @@
+package pages
+
+import (
+	"yourvoice/web/templates"
+	"yourvoice/web/templates/components/button"
+	"yourvoice/web/templates/components/card"
+	"yourvoice/web/templates/components/table"
+	"yourvoice/web/templates/components/icon"
+)
+
+
+templ Dashboard() {
+	@templates.Layout("Dashboard") {
+		<div class="container mx-auto p-6 space-y-6">
+			@DashboardHeader()
+			@StatsGrid()
+			@ActiveEventsSection()
+			@RecentActivitySection()
+		</div>
+	}
+}
+
+
+templ DashboardHeader() {
+	<div class="flex items-center justify-between">
+		<div>
+			<h1 class="text-3xl font-bold">Dashboard</h1>
+			<p class="text-muted-foreground">Welcome to YourVoice Admin</p>
+		</div>
+		@button.Button(button.Props{}) {
+			@icon.Plus(icon.Props{Class: "mr-2 h-4 w-4"})
+			New Event
+		}
+	</div>
+}
+
+
+templ StatsGrid() {
+	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+		@MetricCard("Total Votes", "15,234", "+12% from last month")
+		@MetricCard("Active Events", "3", "2 ending this week")
+		@MetricCard("Total Candidates", "24", "Across all events")
+		@MetricCard("Feedback Messages", "89", "+5 new today")
+	</div>
+}
+
+templ MetricCard(title, value, description string) {
+	@card.Card() {
+		@card.Header() {
+			@card.Title() {
+				{ value }
+			}
+			@card.Description() {
+				{ title }
+			}
+		}
+		@card.Footer() {
+			<p class="text-xs text-muted-foreground">{ description }</p>
+		}
+	}
+}
+
+
+templ ActiveEventsSection() {
+	@card.Card() {
+		@card.Header() {
+			@card.Title() {
+				Active Voting Events
+			}
+			@card.Description() {
+				Manage and monitor current elections
+			}
+		}
+		@card.Footer() {
+			@EventsTable()
+		}
+	}
+}
+
+
+templ EventsTable() {
+	@table.Table(table.Props{}) {
+		@table.Header(table.HeaderProps{}) {
+			@table.Row(table.RowProps{}) {
+				@table.Head(table.HeadProps{}) { Event Name }
+				@table.Head(table.HeadProps{}) { Status }
+				@table.Head(table.HeadProps{}) { Votes }
+				@table.Head(table.HeadProps{}) { End Date }
+				@table.Head(table.HeadProps{}) { Actions }
+			}
+		}
+		@table.Body(table.BodyProps{}) {
+			@EventTableRow("Presidential Election 2024", "Active", "15,234", "Jan 30, 2024", "view")
+			@EventTableRow("City Council Election", "Draft", "0", "Feb 15, 2024", "edit")
+			@EventTableRow("School Board Election", "Scheduled", "0", "Mar 10, 2024", "preview")
+		}
+	}
+}
+
+
+templ EventTableRow(name, status, votes, endDate, actionType string) {
+	@table.Row(table.RowProps{}) {
+		@table.Cell(table.CellProps{}) { { name } }
+		@table.Cell(table.CellProps{}) {
+			@StatusBadge(status)
+		}
+		@table.Cell(table.CellProps{}) { { votes } }
+		@table.Cell(table.CellProps{}) { { endDate } }
+		@table.Cell(table.CellProps{}) {
+			@ActionButton(actionType)
+		}
+	}
+}
+
+
+templ StatusBadge(status string) {
+	if status == "Active" {
+		<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">Active</span>
+	} else if status == "Draft" {
+		<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800">Draft</span>
+	} else if status == "Scheduled" {
+		<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800">Scheduled</span>
+	} else {
+		<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800">{ status }</span>
+	}
+}
+
+
+templ ActionButton(actionType string) {
+	if actionType == "view" {
+		@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeSm}) {
+			View
+		}
+	} else if actionType == "edit" {
+		@button.Button(button.Props{Variant: button.VariantOutline, Size: button.SizeSm}) {
+			Edit
+		}
+	} else if actionType == "preview" {
+		@button.Button(button.Props{Variant: button.VariantGhost, Size: button.SizeSm}) {
+			Preview
+		}
+	}
+}
+
+
+templ RecentActivitySection() {
+	@card.Card() {
+		@card.Header() {
+			@card.Title() {
+				Recent Activity
+			}
+			@card.Description() {
+				Latest system events and updates
+			}
+		}
+		@card.Footer() {
+			@ActivityFeed()
+		}
+	}
+}
+
+
+templ ActivityFeed() {
+	<div class="flex gap-3 overflow-x-auto">
+		@ActivityFeedItem("New vote received", "Presidential Election 2024", "2 minutes ago")
+		@ActivityFeedItem("Event created", "City Council Election", "1 hour ago")
+		@ActivityFeedItem("Candidate added", "John Smith - District 5", "3 hours ago")
+		@ActivityFeedItem("Feedback submitted", "System improvement", "5 hours ago")
+	</div>
+}
+
+
+templ ActivityFeedItem(action, target, timeAgo string) {
+	@card.Card(card.Props{Class: "min-w-64 flex-shrink-0"}) {
+		@card.Header() {
+			@card.Title() {
+				{ action }
+			}
+			@card.Description() {
+				{ target }
+			}
+		}
+		@card.Footer() {
+			<p class="text-xs text-muted-foreground">{ timeAgo }</p>
+		}
+	}
+}
