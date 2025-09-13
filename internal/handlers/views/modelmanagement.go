@@ -17,7 +17,6 @@ import (
 
 type ModelManagementProps struct {
 	Model        any
-	SafeModel    any
 	SearchFields []string
 	Title        string
 	Headers      []string
@@ -30,14 +29,7 @@ type ModelManagementProps struct {
 func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props ModelManagementProps) {
 	ctx := r.Context()
 
-	var managerModel any
-	if props.SafeModel != nil {
-		managerModel = props.SafeModel
-	} else {
-		managerModel = props.Model
-	}
-
-	sliceType := reflect.SliceOf(reflect.TypeOf(managerModel))
+	sliceType := reflect.SliceOf(reflect.TypeOf(props.Model))
 	modelsSlice := reflect.New(sliceType).Interface()
 
 	searchQuery := r.URL.Query().Get("search")
@@ -49,7 +41,7 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 		desc = " desc"
 
 	}
-	orderField := utils.GetJSONTag(managerModel, strings.ReplaceAll(strings.TrimPrefix(orderBy, "-"), " ", ""))
+	orderField := utils.GetJSONTag(props.Model, strings.ReplaceAll(strings.TrimPrefix(orderBy, "-"), " ", ""))
 
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil || page <= 0 {
@@ -60,9 +52,6 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 		size = utils.PageSizeCompact
 	}
 
-	totalItems := int64(0)
-	db.Model(&props.Model).Count(&totalItems)
-
 	if searchQuery != "" {
 		for _, field := range props.SearchFields {
 			db = db.Or(field+" ILIKE ?", "%"+searchQuery+"%")
@@ -70,6 +59,9 @@ func ModelManagement(w http.ResponseWriter, r *http.Request, db *gorm.DB, props 
 	}
 
 	db = props.PrepareDB(db)
+
+	totalItems := int64(0)
+	db.Count(&totalItems)
 
 	if orderField != "" {
 		db = db.Order(orderField + desc)

@@ -13,13 +13,12 @@ import (
 type SafeParty struct {
 	models.Party
 	Candidates     int `json:"candidate_count"`
-	CandidateCount int `json:"-"`
+	CandidateCount int `json:""`
 }
 
 func RegisterPartyRoutes(mux *http.ServeMux, db *gorm.DB) {
 	modelManagementProps := ModelManagementProps{
-		Model:        models.Party{},
-		SafeModel:    SafeParty{},
+		Model:        SafeParty{},
 		Title:        "Parties",
 		SearchFields: []string{"name"},
 		Headers:      []string{"Name", "Candidates", "Created At"},
