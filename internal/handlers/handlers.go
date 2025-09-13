@@ -8,7 +8,7 @@ import (
 	"yourvoice/internal/handlers/routes/identity"
 	"yourvoice/internal/handlers/views"
 	"yourvoice/internal/middleware"
-	"yourvoice/web/templates"
+	"yourvoice/web/templates/pages"
 )
 
 func LoadHanders(router *http.ServeMux, db *gorm.DB) {
@@ -44,7 +44,7 @@ func LoadHanders(router *http.ServeMux, db *gorm.DB) {
 
 	adminRouter := http.NewServeMux()
 
-	adminRouter.Handle("/", templ.Handler(templates.Layout("Admin")))
+	adminRouter.Handle("/", templ.Handler(pages.Dashboard()))
 
 	adminVoteRouter := http.NewServeMux()
 
